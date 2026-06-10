@@ -1,0 +1,8 @@
+team_id,team_naam,regio_id,regio_naam,is_actief
+1,Delft A,1,Delft,true
+2,Delft B,1,Delft,true
+3,Delft C,1,Delft,true
+4,Amsterdam Alpha,2,Amsterdam,true
+5,Amsterdam De Pijp,2,Amsterdam,true
+6,Eindhoven A,3,Eindhoven,true
+7,Intern,1,Delft,true

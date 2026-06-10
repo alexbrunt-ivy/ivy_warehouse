@@ -1,0 +1,19 @@
+# Python
+.venv/
+__pycache__/
+
+# dbt generated files
+target/
+dbt_packages/
+logs/
+
+# Environment variables
+.env
+.env.*
+
+# Editor settings
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db

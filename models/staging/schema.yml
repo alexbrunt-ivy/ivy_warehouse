@@ -1,0 +1,18 @@
+version: 2
+
+models:
+  - name: stg_huds_projecten
+    description: >
+      Projecten uit HUDS
+  - name: stg_huds_uren
+    description: >
+      uren uit HUDS
+  - name: stg_huds_uurtarieven
+    description: >
+      uurtarieven uit HUDS
+  - name: stg_huds_facturen
+    description: >
+      facturen uit HUDS
+  - name: stg_huds_bedrijven
+    description: >
+      Bedrijven uit HUDS

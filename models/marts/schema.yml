@@ -1,0 +1,6 @@
+version: 2
+
+models:
+  - name: dim_date
+    description: >
+      Dimensie tabel voor datum-gerelateerde attributen.

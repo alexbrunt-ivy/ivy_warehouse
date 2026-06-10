@@ -1,0 +1,68 @@
+name: ivy_warehouse
+version: '1.0.0'
+config-version: 2
+
+# Profile verwijst naar de verbinding in je profiles.yml (hoe dbt inlogt op BQ).
+profile: ivy_bigquery
+
+# Hier definieer je waar dbt moet zoeken naar verschillende soorten bestanden.
+model-paths: ["models"]
+seed-paths: ["seeds"]
+test-paths: ["tests"]
+macro-paths: ["macros"]
+analysis-paths: ["analyses"]
+snapshot-paths: ["snapshots"]
+
+models:
+  ivy_warehouse:
+    staging:
+      +materialized: view
+      +schema: staging             # Landt in BigQuery dataset: [naam]_staging
+
+    intermediate:
+      +materialized: table
+      +schema: intermediate        # Landt in BigQuery dataset: [naam]_intermediate
+      
+    marts:
+      +materialized: table
+      +schema: marts               # Landt in BigQuery dataset: [naam]_marts
+
+seeds:
+  ivy_warehouse:
+    +schema: seeds
+    dim_regio:
+      +column_types:
+        regio_id: INT64
+        is_actief: BOOL
+    dim_team:
+      +column_types:
+        team_id: INT64
+        regio_id: INT64
+        is_actief: BOOL
+    dim_feestdag:
+      +column_types:
+        date: DATE
+        holiday_name: STRING
+        is_official: BOOL
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Test Configuratie
+# ─────────────────────────────────────────────────────────────────────────────
+tests:
+  # Als een test faalt (bijv. een dubbel ID), slaat dbt de foute rijen op 
+  # in een aparte tabel zodat je ze kunt onderzoeken.
+  +store_failures: true
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Variabelen (Vars)
+# ─────────────────────────────────────────────────────────────────────────────
+# Variabelen zijn handig om instellingen centraal te beheren. 
+# Je kunt ze in je SQL code aanroepen met: {{ var('naam') }}.
+# Zo hoef je niet op 10 plekken een getal te wijzigen.
+vars:
+  # Hoeveel uur werkt iemand gemiddeld full-time?
+  # Gebruikt in mart_bezetting.sql voor capaciteitsplanning.
+  beschikbare_uren_per_maand: 160
+
+  # De datum vanaf wanneer we data willen inladen (voor incremental loads).
+  start_date: '2020-01-01'

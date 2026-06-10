@@ -1,0 +1,47 @@
+version: 2
+
+sources:
+  # De HUDS bron: handmatige exports uit Betty Blocks.
+  - name: huds
+    database: ivy-warehouse   # Jouw BigQuery Project ID
+    schema: raw_huds              # De dataset naam in BigQuery
+    description: >
+      exports uit HUDS, opgehaald vanuit een google drive folder
+
+    tables:
+      - name: raw_huds_uurtarieven
+        description: tarieven per project per rol
+
+      - name: raw_huds_facturen
+        description: facturen uit huds
+
+      - name: raw_huds_uren
+        description: uren uit huds
+
+      - name: raw_huds_bedrijven
+        description: klantgegevens uit huds
+
+      - name: raw_huds_projecten
+        description: projecten uit huds  
+
+        
+
+  # De bron voor Google Sheets data.
+# - name: sheets
+#   database: ivy-warehouse
+#   schema: raw_sheets
+#   description: >
+#     data vanuit google sheets, met een python script geinjecteerd in bigquery
+#    tables:
+
+  # De bron voor HubSpot CRM data.
+# - name: hubspot
+#   database: ivy-warehouse
+#   schema: raw_hubspot
+#   description: >
+#     Data die direct uit de HubSpot API komt
+#    tables:
+#      - name: raw_hubspot_contacts
+#        description: Alle personen die in HubSpot staan.
+#      - name: raw_hubspot_companies
+#        description: Alle bedrijven die in HubSpot staan.
