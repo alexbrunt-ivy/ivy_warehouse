@@ -2,8 +2,7 @@ name: dbt CI
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
 
 jobs:
@@ -17,12 +16,24 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install dbt
+      - run: pip install dbt-bigquery
+
+      - run: dbt deps
+
+      - name: Create dbt profile
         run: |
-          pip install dbt-bigquery
+          mkdir -p ~/.dbt
+          cat > ~/.dbt/profiles.yml << 'EOF'
+          ivy_warehouse:
+            target: dev
+            outputs:
+              dev:
+                type: bigquery
+                method: oauth
+                project: dummy-project
+                dataset: dummy_dataset
+                threads: 4
+                location: europe-west4
+          EOF
 
-      - name: Install packages
-        run: dbt deps
-
-      - name: Parse project
-        run: dbt parse
+      - run: dbt parse
