@@ -24,7 +24,7 @@ jobs:
         run: |
           mkdir -p ~/.dbt
           cat > ~/.dbt/profiles.yml << 'EOF'
-          ivy_warehouse:
+          ivy_bigquery:
             target: dev
             outputs:
               dev:
