@@ -1,0 +1,35 @@
+[project]
+name = "ivy-warehouse"
+version = "0.1.0"
+description = "Ivy data warehouse - dbt + BigQuery"
+requires-python = ">=3.12,<3.13"
+
+dependencies = [
+    "dbt-bigquery>=1.11.1",
+]
+
+[dependency-groups]
+# Dev tools die je lokaal gebruikt maar niet in productie/CI nodig zijn
+dev = [
+    "pre-commit>=3.0.0",
+]
+
+# Later toevoegen als je Prefect erbij pakt:
+# orchestration = [
+#     "prefect>=3.0.0",
+#     "prefect-dbt>=0.6.0",
+# ]
+
+[tool.uv]
+# Zorg dat uv ook de dev dependencies installeert bij `uv sync`
+default-groups = ["dev"]
+
+[tool.uv.sources]
+# Hier kun je later private packages of git dependencies toevoegen
+
+# ─────────────────────────────────────────────────────────────────────────────
+# dbt configuratie (optioneel maar handig voor tooling zoals editors)
+# ─────────────────────────────────────────────────────────────────────────────
+[tool.dbt]
+project-dir = "."
+profiles-dir = "~/.dbt"
