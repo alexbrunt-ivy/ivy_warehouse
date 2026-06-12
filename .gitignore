@@ -17,3 +17,7 @@ logs/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Secrets
+secrets/
+dbt_internal_packages/
