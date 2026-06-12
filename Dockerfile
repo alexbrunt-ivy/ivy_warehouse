@@ -41,4 +41,4 @@ COPY . .
 #     docker run ivy-warehouse \
 #       python flows/pipeline.py
 # ─────────────────────────────────────────────────────────────────────────────
-CMD ["dbt", "run"]
+CMD ["python", "-m", "flows.pipeline"]
