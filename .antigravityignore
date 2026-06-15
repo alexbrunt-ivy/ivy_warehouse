@@ -1,0 +1,40 @@
+# Python
+.venv/
+__pycache__/
+
+# dbt generated files
+target/
+dbt_packages/
+logs/
+
+# dbt compiled artifacts (extra clarity)
+target/run/
+target/compiled/
+
+# Data / exports (important for AI context control)
+data/
+exports/
+*.csv
+*.parquet
+*.xlsx
+
+# Environment variables
+.env
+.env.*
+
+# Editor settings
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Secrets
+secrets/
+
+# Logs
+*.log
+
+# Temporary files
+tmp/
+temp/
