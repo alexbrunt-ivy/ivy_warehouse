@@ -1,0 +1,52 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# profiles.yml TEMPLATE
+#
+# GEBRUIK:
+#   1. Kopieer dit bestand naar user/.dbt/profiles.yml
+#   2. Vul jouw GCP project ID in
+#   3. Kies je authenticatie methode (oauth voor lokaal, service-account voor prod)
+#
+# DIT BESTAND STAAT IN GIT — vul hier geen echte credentials in!
+# Het echte profiles.yml moet in user/.dbt/ staan.
+# ─────────────────────────────────────────────────────────────────────────────
+
+ivy_bigquery:
+  target: dev
+  outputs:
+
+    # ── Lokaal ontwikkelen ────────────────────────────────────────────────────
+    dev:
+      type: bigquery
+      method: oauth                        # inloggen via je Google account
+      project: ivy-warehouse               # GCP project ID
+      dataset: dev              # pas eventueel aan naar: dev_naam als we later met aparte datasets werken
+      threads: 4
+      timeout_seconds: 300
+      location: europe-west4
+      priority: interactive
+
+    # ── Productie ─────────────────────────────────────────────────────────────
+    prod:
+      type: bigquery
+      method: service-account
+      project: ivy-warehouse
+      dataset: prod
+      threads: 8
+      timeout_seconds: 300
+      location: europe-west4
+      priority: interactive
+      keyfile: ~/.gcp/ivy-service-account.json   # vraag het service account JSON bestand op bij de projectbeheerder
+
+    # ── CI/CD (GitHub Actions) ────────────────────────────────────────────────
+    # Dit target wordt automatisch gebruikt door GitHub Actions via secrets.
+    # Hoef je lokaal niets mee te doen.
+    ci:
+      type: bigquery
+      method: service-account
+      project: "{{ env_var('DBT_ENV_GCP_PROJECT') }}"
+      dataset: "{{ env_var('DBT_ENV_GCP_DATASET') }}"
+      threads: 4
+      timeout_seconds: 300
+      location: europe-west4
+      priority: interactive
+      keyfile: "{{ env_var('GITHUB_WORKSPACE') }}/ivy-warehouse/gcp_key.json"

@@ -1,0 +1,51 @@
+[project]
+name = "ivy-warehouse"
+version = "0.1.0"
+description = "Ivy data warehouse - dbt + BigQuery + Prefect"
+requires-python = ">=3.12,<3.13"
+ 
+dependencies = [
+    "dbt-bigquery>=1.11.1",
+    # Prefect orchestratie
+    "prefect>=3.7.0",
+    "prefect-gcp>=0.6.20",       # GcpCredentials, BigQueryWarehouseBlock, Cloud Run worker
+    "prefect-dbt>=0.7.25",       # DbtCoreOperation met native dbt logging in Prefect UI
+    # BigQuery extras (worden deels al meegetrokken door dbt-bigquery, maar expliciet is beter)
+    "google-cloud-bigquery>=3.41.0",
+    "google-cloud-secret-manager>=2.0.0",   # Prefect Blocks slaan secrets hier op
+    "hubspot-api-client>=12.0.0",
+    "pandas>=3.0.3",
+    "python-dotenv>=1.2.2",
+    "pandas-gbq>=0.35.0",
+    "db-dtypes>=1.4.0",
+]
+ 
+[dependency-groups]
+dev = [
+    "pre-commit>=3.0.0",
+]
+ 
+# Aparte groep zodat je `uv sync --group orchestration` kunt draaien in CI/CD
+# zonder dat het de dev tools meeneemt
+orchestration = [
+    "prefect>=3.7.0",
+    "prefect-gcp>=0.6.20",
+    "prefect-dbt>=0.7.25",
+    "google-cloud-bigquery>=3.41.0",
+    "google-cloud-secret-manager>=2.0.0",
+]
+ 
+[tool.uv]
+# lokaal: installeert main deps + dev tools
+default-groups = ["dev"]
+ 
+[tool.uv.sources]
+# Hier kun je later private packages of git dependencies toevoegen
+ 
+# ─────────────────────────────────────────────────────────────────────────────
+# dbt configuratie
+# ─────────────────────────────────────────────────────────────────────────────
+[tool.dbt]
+project-dir = "."
+profiles-dir = "~/.dbt"
+ 

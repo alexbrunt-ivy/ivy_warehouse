@@ -22,9 +22,17 @@ sources:
         description: klantgegevens uit huds
 
       - name: raw_huds_projecten
-        description: projecten uit huds  
+        description: projecten uit huds
 
-        
+      - name: raw_huds_facturatie_overzicht
+        description: maandelijks facturatie-overzicht per project met uren per rol
+
+      - name: raw_huds_uren_omzet_planning
+        description: geplande uren en omzet per project per maand per rol
+
+      - name: raw_huds_uren_omzet_realisatie
+        description: gerealiseerde uren en omzet per project per maand per rol
+
 
   # De bron voor Google Sheets data.
 # - name: sheets
