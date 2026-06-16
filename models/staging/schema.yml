@@ -1,18 +1,206 @@
 version: 2
 
 models:
-  - name: stg_huds_projecten
-    description: >
-      Projecten uit HUDS
-  - name: stg_huds_uren
-    description: >
-      uren uit HUDS
-  - name: stg_huds_uurtarieven
-    description: >
-      uurtarieven uit HUDS
-  - name: stg_huds_facturen
-    description: >
-      facturen uit HUDS
+  # ──────────────────────────────────────────────────────────────────────
+  # stg_huds_bedrijven
+  # ──────────────────────────────────────────────────────────────────────
   - name: stg_huds_bedrijven
     description: >
-      Bedrijven uit HUDS
+      Bedrijven (klanten) uit HUDS, opgeschoond en met juiste datatypes.
+    columns:
+      - name: bedrijf_id
+        description: Uniek ID van het bedrijf
+        data_tests:
+          - unique
+          - not_null
+      - name: bedrijfsnaam
+        description: Naam van hecnt bedrijf
+        data_tests:
+          - not_null
+
+  # ──────────────────────────────────────────────────────────────────────
+  # stg_huds_facturen
+  # ──────────────────────────────────────────────────────────────────────
+  - name: stg_huds_facturen
+    description: >
+      Facturen uit HUDS, opgeschoond en met juiste datatypes.
+    columns:
+      - name: factuur_nummer
+        description: Uniek factuurnummer
+        data_tests:
+          - unique
+          - not_null
+      - name: factuurdatum
+        description: Datum van de factuur
+        data_tests:
+          - not_null
+      - name: status
+        description: Status van de factuur
+        data_tests:
+          - not_null
+      - name: bedrag_inc_btw
+        description: Factuurbedrag inclusief BTW
+        data_tests:
+          - not_null
+      - name: is_factuur_voldaan
+        description: Of de factuur betaald is (true/false)
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [true, false]
+                quote: false
+  # ──────────────────────────────────────────────────────────────────────
+  # stg_huds_projecten
+  # ──────────────────────────────────────────────────────────────────────
+  - name: stg_huds_projecten
+    description: >
+      Projecten uit HUDS, opgeschoond en met juiste datatypes.
+    columns:
+      - name: project_nummer
+        description: Uniek projectnummer
+        data_tests:
+          - unique
+          - not_null
+      - name: project_id
+        description: Intern ID van het project
+        data_tests:
+          - unique
+          - not_null
+      - name: projectnaam
+        description: Naam van het project
+        data_tests:
+          - not_null
+      - name: status
+        description: Status van het project
+        data_tests:
+          - not_null
+
+  # ──────────────────────────────────────────────────────────────────────
+  # stg_huds_uren
+  # ──────────────────────────────────────────────────────────────────────
+  - name: stg_huds_uren
+    description: >
+      Urenregistraties uit HUDS, opgeschoond en met juiste datatypes.
+    columns:
+      - name: uren_nummer
+        description: Uniek volgnummer van de urenregistratie
+        data_tests:
+          - unique
+          - not_null
+      - name: medewerker_naam
+        description: Naam van de medewerker
+        data_tests:
+          - not_null
+      - name: project
+        description: Projectnaam waarop de uren zijn geboekt
+        data_tests:
+          - not_null
+      - name: uren
+        description: Aantal gewerkte uren
+        data_tests:
+          - not_null
+
+  # ──────────────────────────────────────────────────────────────────────
+  # stg_huds_uurtarieven
+  # ──────────────────────────────────────────────────────────────────────
+  - name: stg_huds_uurtarieven
+    description: >
+      Uurtarieven per project en rol uit HUDS.
+    columns:
+      - name: project_nummer
+        description: Projectnummer waarop het tarief van toepassing is
+        data_tests:
+          - not_null
+      - name: rol
+        description: De rol waarvoor het tarief geldt
+        data_tests:
+          - not_null
+      - name: uurtarief
+        description: Het uurtarief in euro's
+        data_tests:
+          - not_null
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - project_nummer
+              - rol
+              - start_datum
+
+  # ──────────────────────────────────────────────────────────────────────
+  # stg_huds_facturatie_overzicht
+  # ──────────────────────────────────────────────────────────────────────
+  - name: stg_huds_facturatie_overzicht
+    description: >
+      Maandelijks facturatie-overzicht per project met uren per rol.
+    columns:
+      - name: project
+        description: Projectnaam
+        data_tests:
+          - not_null
+      - name: periode
+        description: De maand (als datum) van het overzicht
+        data_tests:
+          - not_null
+      - name: totaal_uren
+        description: Totaal aantal uren in deze periode
+      - name: totaal_omzet
+        description: Totale omzet in deze periode
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - project
+              - periode
+
+  # ──────────────────────────────────────────────────────────────────────
+  # stg_huds_uren_omzet_planning
+  # ──────────────────────────────────────────────────────────────────────
+  - name: stg_huds_uren_omzet_planning
+    description: >
+      Geplande uren en omzet per project per maand, uitgesplitst per rol.
+    columns:
+      - name: project
+        description: Projectnaam
+        data_tests:
+          - not_null
+      - name: periode
+        description: De maand (als datum) van de planning
+        data_tests:
+          - not_null
+      - name: totaal_uren
+        description: Totaal geplande uren
+      - name: totaal_omzet
+        description: Totaal geplande omzet
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - project
+              - periode
+
+  # ──────────────────────────────────────────────────────────────────────
+  # stg_huds_uren_omzet_realisatie
+  # ──────────────────────────────────────────────────────────────────────
+  - name: stg_huds_uren_omzet_realisatie
+    description: >
+      Gerealiseerde uren en omzet per project per maand, uitgesplitst per rol.
+    columns:
+      - name: project
+        description: Projectnaam
+        data_tests:
+          - not_null
+      - name: periode
+        description: De maand (als datum) van de realisatie
+        data_tests:
+          - not_null
+      - name: totaal_uren
+        description: Totaal gerealiseerde uren
+      - name: totaal_omzet
+        description: Totaal gerealiseerde omzet
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - project
+              - periode
