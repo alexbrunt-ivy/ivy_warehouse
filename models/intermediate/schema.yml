@@ -2,5 +2,23 @@ version: 2
 
 models:
   - name: int_bedrijven
-    description: >
-      Bedrijven gecombineerd
+    description: Intermedieaire tabel voor bedrijven
+    columns:
+      - name: id
+        description: Unieke identifier van het bedrijf
+        data_type: bigint
+      - name: name
+        description: Naam van het bedrijf
+        data_type: string
+      - name: industry
+        description: Industrie waarin het bedrijf teweegbrengt
+        data_type: string
+      - name: employees
+        description: Aantal werknemers bij het bedrijf
+        data_type: integer
+      - name: created_at
+        description: Tijdstip waarop het bedrijf is aangemaakt
+        data_type: timestamp
+      - name: updated_at
+        description: Tijdstip waarop het bedrijf is bijgewerkt
+        data_type: timestamp
