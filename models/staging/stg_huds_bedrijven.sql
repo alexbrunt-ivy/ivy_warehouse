@@ -1,6 +1,3 @@
--- stg_huds_bedrijven.sql
--- Staging laag: opschonen en type-casting van de ruwe HUDS bedrijven-export.
-
 with bron as (
 
     select * from {{ source('huds', 'raw_huds_bedrijven') }}
