@@ -32,6 +32,10 @@ sources:
 
       - name: raw_huds_uren_omzet_realisatie
         description: gerealiseerde uren en omzet per project per maand per rol
+        
+      - name: raw_data_werknemers_intern
+        description: interne werknemersgegevens uit huds
+
 
 
   # De bron voor Google Sheets data.
