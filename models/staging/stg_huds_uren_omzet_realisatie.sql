@@ -1,6 +1,3 @@
--- stg_huds_uren_omzet_realisatie.sql
--- Staging laag: opschonen en type-casting van de ruwe HUDS uren/omzet realisatie-export.
-
 with bron as (
 
     select * from {{ source('huds', 'raw_huds_uren_omzet_realisatie') }}

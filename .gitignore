@@ -17,9 +17,6 @@ logs/
 # OS files
 .DS_Store
 Thumbs.db
-<<<<<<< HEAD
-dbt_internal_packages/
-=======
 
 # Secrets
 secrets/
@@ -29,4 +26,4 @@ dbt_internal_packages/
 # large SQL output files
 # CSV extracts
 
->>>>>>> deb274093085ef35fb52170d20cd2ac2c1bc4e72
+.aider*
