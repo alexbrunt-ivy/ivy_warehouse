@@ -1,6 +1,20 @@
 version: 2
 
 models:
-  - name: dim_date
+  - name: dim_date  # (Of hoe je datumtabel ook heet)
     description: >
       Dimensie tabel voor datum-gerelateerde attributen.
+
+  - name: dim_project
+    description: >
+      Dimensie tabel voor projecten
+
+  - name: dim_werknemers_intern
+    description: >
+      Dimensie tabel voor interne werknemers
+
+  - name: fct_uren_omzet
+    description: >
+      Samenvoeging van gerealiseerde uren/omzet (verleden) en geplande uren/omzet (toekomst).
+      De scheidslijn ligt op de huidige maand: uren/omzet vóór de huidige maand komen uit realisatie,
+      vanaf de huidige maand (inclusief) komen deze uit de planning.
