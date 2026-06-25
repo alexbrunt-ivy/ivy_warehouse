@@ -26,3 +26,4 @@ dbt_internal_packages/
 # large SQL output files
 # CSV extracts
 
+.aider*

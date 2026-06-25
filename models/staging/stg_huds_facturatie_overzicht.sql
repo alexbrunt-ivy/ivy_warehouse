@@ -1,6 +1,3 @@
--- stg_huds_facturatie_overzicht.sql
--- Staging laag: opschonen en type-casting van de ruwe HUDS facturatie overzicht-export.
-
 with bron as (
 
     select * from {{ source('huds', 'raw_huds_facturatie_overzicht') }}
