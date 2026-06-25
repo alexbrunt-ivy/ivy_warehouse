@@ -204,3 +204,7 @@ models:
             combination_of_columns:
               - project
               - periode
+              
+  - name: stg_huds_werknemers_intern
+    description: >
+      Interne werknemersgegevens uit huds.
