@@ -47,13 +47,13 @@ sources:
 #    tables:
 
   # De bron voor HubSpot CRM data.
-# - name: hubspot
-#   database: ivy-warehouse
-#   schema: raw_hubspot
-#   description: >
-#     Data die direct uit de HubSpot API komt
-#    tables:
-#      - name: raw_hubspot_contacts
-#        description: Alle personen die in HubSpot staan.
-#      - name: raw_hubspot_companies
-#        description: Alle bedrijven die in HubSpot staan.
+  - name: hubspot
+    database: ivy-warehouse
+    schema: raw_hubspot
+    description: >
+      Data die direct uit de HubSpot API komt
+    tables:
+      - name: raw_hubspot_contacts
+        description: Alle personen die in HubSpot staan.
+      - name: raw_hubspot_companies
+        description: Alle bedrijven die in HubSpot staan.
