@@ -22,8 +22,7 @@ Thumbs.db
 secrets/
 dbt_internal_packages/
 
-# Possibly:
-# large SQL output files
 # CSV extracts
+*.csv
 
 .aider*

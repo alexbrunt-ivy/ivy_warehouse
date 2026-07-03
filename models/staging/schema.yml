@@ -17,6 +17,8 @@ models:
         description: Naam van hecnt bedrijf
         data_tests:
           - not_null
+      - name: normalized_name
+        description: Opgeschoonde bedrijfsnaam voor fuzzy matching
 
   # ──────────────────────────────────────────────────────────────────────
   # stg_huds_facturen
@@ -208,3 +210,60 @@ models:
   - name: stg_huds_werknemers_intern
     description: >
       Interne werknemersgegevens uit huds.
+
+  - name: stg_hubspot_bedrijven
+    description: >
+      Bedrijven uit HubSpot, gereduceerd naar kernvelden en opgeschoond met juiste datatypes.
+    columns:
+      - name: company_id
+        description: Uniek HubSpot ID van het bedrijf
+        data_tests:
+          - unique
+          - not_null
+      - name: company_name
+        description: Bedrijfsnaam uit HubSpot
+      - name: normalized_name
+        description: Opgeschoonde bedrijfsnaam voor fuzzy matching
+      - name: domain
+        description: Primair domein van het bedrijf
+      - name: created_at
+        description: Technische aanmaakdatum van het HubSpot record
+      - name: updated_at
+        description: Laatste technische wijzigingsdatum van het HubSpot record
+      - name: annual_revenue
+        description: Jaaromzet zoals geregistreerd in HubSpot
+      - name: hs_analytics_source
+        description: Originele analytics bron van het bedrijf
+      - name: hs_analytics_latest_source
+        description: Laatste analytics bron van het bedrijf
+
+  - name: stg_hubspot_contacten
+    description: >
+      Contacten uit HubSpot, gereduceerd naar kernvelden en opgeschoond met juiste datatypes.
+    columns:
+      - name: contact_id
+        description: Uniek HubSpot ID van het contact
+        data_tests:
+          - unique
+          - not_null
+      - name: email
+        description: E-mailadres van het contact
+      - name: first_name
+        description: Voornaam van het contact
+      - name: last_name
+        description: Achternaam van het contact
+      - name: associated_company_id
+        description: HubSpot ID van het gekoppelde bedrijf
+      - name: company_id
+        description: Bedrijfs-ID uit HubSpot of externe bron
+      - name: created_at
+        description: Technische aanmaakdatum van het HubSpot record
+      - name: updated_at
+        description: Laatste technische wijzigingsdatum van het HubSpot record
+      - name: is_currently_in_workflow
+        description: Of het contact momenteel in een HubSpot workflow zit
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [true, false]
+                quote: false

@@ -1,24 +1,106 @@
 version: 2
 
 models:
-  - name: int_bedrijven
-    description: Intermedieaire tabel voor bedrijven
+  - name: int_bedrijven_samengevoegd
+    description: >
+      Voorzet voor een gecombineerd bedrijvenmodel op basis van HUDS en HubSpot.
+      Deze tabel landt in de intermediate dataset en kan later verder worden ingevuld.
     columns:
-      - name: id
-        description: Unieke identifier van het bedrijf
-        data_type: bigint
-      - name: name
-        description: Naam van het bedrijf
-        data_type: string
-      - name: industry
-        description: Industrie waarin het bedrijf teweegbrengt
-        data_type: string
-      - name: employees
-        description: Aantal werknemers bij het bedrijf
-        data_type: integer
-      - name: created_at
-        description: Tijdstip waarop het bedrijf is aangemaakt
-        data_type: timestamp
-      - name: updated_at
-        description: Tijdstip waarop het bedrijf is bijgewerkt
-        data_type: timestamp
+      - name: bedrijf_id
+        description: Bedrijf ID uit HUDS
+      - name: hubspot_company_id
+        description: Bedrijf ID uit HubSpot
+      - name: bedrijfsnaam
+        description: Samengevoegde bedrijfsnaam (HUDS met fallback naar HubSpot)
+      - name: huds_bedrijfsnaam
+        description: Originele bedrijfsnaam uit HUDS
+      - name: hubspot_company_name
+        description: Originele bedrijfsnaam uit HubSpot
+      - name: domain
+        description: Primair domein uit HubSpot
+      - name: huds_beschrijving
+        description: Beschrijving uit HUDS
+      - name: hubspot_description
+        description: Beschrijving uit HubSpot
+      - name: sales_lead
+        description: Sales lead uit HUDS
+      - name: volledig_adres
+        description: Gecombineerd adres (straatnaam en huisnummer) uit HubSpot
+
+  - name: int_uren_planning_realisatie
+    description: >
+      Gecombineerd intermediate model voor geplande uren, gerealiseerde uren en facturatie per project en periode.
+      Bedoeld als basis voor latere facttabellen, voorspellingen en afwijkingsanalyses.
+    columns:
+      - name: project
+        description: Projectnaam; onderdeel van de voorlopige grain
+        data_tests:
+          - not_null
+      - name: periode
+        description: Periode; onderdeel van de voorlopige grain
+        data_tests:
+          - not_null
+      - name: geplande_uren
+        description: Totaal geplande uren
+      - name: gerealiseerde_uren
+        description: Totaal gerealiseerde uren
+      - name: gefactureerde_uren
+        description: Totaal gefactureerde uren
+      - name: afwijking_uren_realisatie_vs_planning
+        description: Gerealiseerde uren minus geplande uren
+      - name: afwijking_omzet_realisatie_vs_planning
+        description: Gerealiseerde omzet minus geplande omzet
+      - name: afwijking_uren_facturatie_vs_realisatie
+        description: Gefactureerde uren minus gerealiseerde uren
+      - name: afwijking_omzet_facturatie_vs_realisatie
+        description: Gefactureerde omzet minus gerealiseerde omzet
+
+  - name: int_uren_registraties
+    description: >
+      Detailmodel met een rij per urenregistratie uit HUDS, verrijkt met voorlopige project- en werknemerkeys.
+      Bedoeld als basis voor een latere fct_uren_registraties.
+    columns:
+      - name: uren_nummer
+        description: Uniek volgnummer van de urenregistratie
+        data_tests:
+          - unique
+          - not_null
+      - name: project_id
+        description: Project ID uit HUDS op basis van voorlopige matching op projectnaam
+      - name: project_nummer
+        description: Projectnummer uit HUDS op basis van voorlopige matching op projectnaam
+      - name: werknemer_id
+        description: Werknemer ID uit HUDS op basis van voorlopige matching op medewerkernaam
+      - name: uren_datum
+        description: Datum van de urenregistratie op basis van start_tijdstip
+      - name: periode
+        description: Maand van de urenregistratie op basis van start_tijdstip
+      - name: medewerker_naam
+        description: Naam van de medewerker
+      - name: project
+        description: Projectnaam zoals vastgelegd op de urenregel
+      - name: uren
+        description: Aantal geregistreerde uren
+      - name: netto_uren_op_basis_van_minuten
+        description: Netto uren berekend uit tijd_gewerkt_minuten minus pauze_minuten
+      - name: tarief
+        description: Genormaliseerd tarief als numerieke waarde
+      - name: omzet_op_basis_van_tarief
+        description: Uren vermenigvuldigd met tarief
+
+  - name: int_facturen_verrijkt
+    description: >
+      Gedetailleerd overzicht van facturen uit HUDS, verrijkt met bedrijf- en project IDs.
+      Inclusief gesplitste projectnamen en een uniforme betalingsstatus.
+    columns:
+      - name: factuur_nummer
+        description: Uniek factuurnummer
+        data_tests:
+          - unique
+          - not_null
+      - name: huds_bedrijf_id
+        description: ID van het gekoppelde HUDS bedrijf
+      - name: project_nummer
+        description: Afgeleid projectnummer uit de originele factuurstring
+      - name: factuur_status_categorie
+        description: Uniforme status of de factuur betaald, open of te laat is
