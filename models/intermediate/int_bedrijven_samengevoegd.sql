@@ -21,6 +21,7 @@ final as (
         coalesce(huds.bedrijfsnaam, hubspot.company_name) as bedrijfsnaam,
         huds.bedrijfsnaam as huds_bedrijfsnaam,
         hubspot.company_name as hubspot_bedrijfsnaam,
+        huds.normalized_name,
         hubspot.domain as website,
         huds.beschrijving as huds_beschrijving,
         hubspot.description as hubspot_beschrijving,

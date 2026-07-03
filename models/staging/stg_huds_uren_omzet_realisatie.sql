@@ -17,7 +17,7 @@ opgeschoond as (
         trim(Accountmanager)                        as accountmanager,
 
         -- === Datums ===
-        Periode                                     as periode,
+        cast(Periode as Date)                       as periode,
 
         -- === Totalen ===
         cast(Totaal_uren as FLOAT64)                as totaal_uren,

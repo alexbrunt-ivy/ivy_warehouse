@@ -87,3 +87,20 @@ models:
         description: Genormaliseerd tarief als numerieke waarde
       - name: omzet_op_basis_van_tarief
         description: Uren vermenigvuldigd met tarief
+
+  - name: int_facturen_verrijkt
+    description: >
+      Gedetailleerd overzicht van facturen uit HUDS, verrijkt met bedrijf- en project IDs.
+      Inclusief gesplitste projectnamen en een uniforme betalingsstatus.
+    columns:
+      - name: factuur_nummer
+        description: Uniek factuurnummer
+        data_tests:
+          - unique
+          - not_null
+      - name: huds_bedrijf_id
+        description: ID van het gekoppelde HUDS bedrijf
+      - name: project_nummer
+        description: Afgeleid projectnummer uit de originele factuurstring
+      - name: factuur_status_categorie
+        description: Uniforme status of de factuur betaald, open of te laat is
