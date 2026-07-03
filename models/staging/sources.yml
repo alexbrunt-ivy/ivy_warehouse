@@ -39,12 +39,14 @@ sources:
 
 
   # De bron voor Google Sheets data.
-# - name: sheets
-#   database: ivy-warehouse
-#   schema: raw_sheets
-#   description: >
-#     data vanuit google sheets, met een python script geinjecteerd in bigquery
-#    tables:
+  - name: sheets
+    database: ivy-warehouse
+    schema: raw_sheets
+    description: >
+      data vanuit google sheets, met een python script geinjecteerd in bigquery
+    tables:
+      - name: vw_project_voortgang
+        description: Project voortgangsgegevens uit Google Sheets
 
   # De bron voor HubSpot CRM data.
 # - name: hubspot

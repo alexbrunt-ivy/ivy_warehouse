@@ -18,6 +18,8 @@ dependencies = [
     "python-dotenv>=1.2.2",
     "pandas-gbq>=0.35.0",
     "db-dtypes>=1.4.0",
+    "dbt-core>=1.11.11",
+    "dbt-postgres>=1.10.2",
 ]
  
 [dependency-groups]

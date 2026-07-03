@@ -208,3 +208,18 @@ models:
   - name: stg_huds_werknemers_intern
     description: >
       Interne werknemersgegevens uit huds.
+
+  - name: stg_sheet_project_voortgang
+    description: >
+      Project voortgangsgegevens uit Google Sheets, opgeschoond en gecast.
+    columns:
+      - name: project_id
+        description: Uniek project-ID
+      - name: projectnaam
+        description: Naam van het project
+      - name: status
+        description: Project status
+      - name: voortgangspercentage
+        description: Vooruitgangspercentage van het project
+      - name: laatste_update
+        description: Laatste datum/tijd van update
