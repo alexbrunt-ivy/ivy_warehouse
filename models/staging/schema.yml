@@ -17,6 +17,8 @@ models:
         description: Naam van hecnt bedrijf
         data_tests:
           - not_null
+      - name: normalized_name
+        description: Opgeschoonde bedrijfsnaam voor fuzzy matching
 
   # ──────────────────────────────────────────────────────────────────────
   # stg_huds_facturen
@@ -218,6 +220,10 @@ models:
         data_tests:
           - unique
           - not_null
+      - name: company_name
+        description: Bedrijfsnaam uit HubSpot
+      - name: normalized_name
+        description: Opgeschoonde bedrijfsnaam voor fuzzy matching
       - name: domain
         description: Primair domein van het bedrijf
       - name: created_at

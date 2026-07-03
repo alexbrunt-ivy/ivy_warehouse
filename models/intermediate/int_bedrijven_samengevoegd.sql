@@ -15,30 +15,31 @@ final as (
     select
         -- === Keys ===
         huds.bedrijf_id,
-        hubspot.company_id as hubspot_company_id,
+        hubspot.company_id as hubspot_bedrijf_id,
 
         -- === Attributen ===
-        huds.bedrijfsnaam,
-        hubspot.domain,
+        coalesce(huds.bedrijfsnaam, hubspot.company_name) as bedrijfsnaam,
+        huds.bedrijfsnaam as huds_bedrijfsnaam,
+        hubspot.company_name as hubspot_bedrijfsnaam,
+        hubspot.domain as website,
         huds.beschrijving as huds_beschrijving,
-        hubspot.description as hubspot_description,
+        hubspot.description as hubspot_beschrijving,
         huds.sales_lead,
 
         -- === Locatie ===
-        hubspot.address,
-        hubspot.address2,
-        hubspot.city,
-        hubspot.country,
+        NULLIF(TRIM(CONCAT(COALESCE(hubspot.address, ''), ' ', COALESCE(hubspot.address2, ''))), '') as adres,
+        hubspot.city as stad,
+        hubspot.country as land,
 
         -- === Timestamps ===
         huds.aangemaakt_op as huds_aangemaakt_op,
-        hubspot.created_at as hubspot_created_at,
-        hubspot.updated_at as hubspot_updated_at,
+        hubspot.created_at as hubspot_aangemaakt_op,
+        hubspot.updated_at as hubspot_geupdated_op,
         hubspot.loaded_at as hubspot_loaded_at
 
     from huds_bedrijven as huds
     full outer join hubspot_bedrijven as hubspot
-        on lower(trim(huds.bedrijfsnaam)) = lower(trim(hubspot.domain))
+        on huds.normalized_name = hubspot.normalized_name
 
 )
 

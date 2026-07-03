@@ -56,6 +56,12 @@ opgeschoond as (
         ) as loaded_at,
 
         -- === Bedrijfsprofiel ===
+        trim(name) as company_name,
+        REGEXP_REPLACE(
+            REGEXP_REPLACE(lower(trim(name)), r'\b(b\.v\.|bv|n\.v\.|nv|v\.o\.f\.|vof|group|groep)\b', ''),
+            r'[^a-z0-9]', 
+            ''
+        ) as normalized_name,
         trim(domain) as domain,
         trim(about_us) as about_us,
         trim(description) as description,

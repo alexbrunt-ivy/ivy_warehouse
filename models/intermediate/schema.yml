@@ -11,7 +11,11 @@ models:
       - name: hubspot_company_id
         description: Bedrijf ID uit HubSpot
       - name: bedrijfsnaam
-        description: Bedrijfsnaam uit HUDS
+        description: Samengevoegde bedrijfsnaam (HUDS met fallback naar HubSpot)
+      - name: huds_bedrijfsnaam
+        description: Originele bedrijfsnaam uit HUDS
+      - name: hubspot_company_name
+        description: Originele bedrijfsnaam uit HubSpot
       - name: domain
         description: Primair domein uit HubSpot
       - name: huds_beschrijving
@@ -20,6 +24,8 @@ models:
         description: Beschrijving uit HubSpot
       - name: sales_lead
         description: Sales lead uit HUDS
+      - name: volledig_adres
+        description: Gecombineerd adres (straatnaam en huisnummer) uit HubSpot
 
   - name: int_uren_planning_realisatie
     description: >
