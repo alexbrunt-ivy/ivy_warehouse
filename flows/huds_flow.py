@@ -7,10 +7,7 @@ from flows.ingestion.huds import DriveHudsSource, ingest_huds
 
 # Folder ID van de Drive-map met HUDS-exports.
 # Staat ook in .env als HUDS_DRIVE_FOLDER_ID zodat je het per omgeving kunt overschrijven.
-DRIVE_FOLDER_ID = os.getenv(
-    "HUDS_DRIVE_FOLDER_ID",
-    "11G124iUsexfoXE9i9D5dVKhdnQcSyjTW",
-)
+DRIVE_FOLDER_ID = os.getenv("HUDS_DRIVE_FOLDER_ID") or "11G124iUsexfoXE9i9D5dVKhdnQcSyjTW"
 
 
 def run_huds_ingestion(log: logging.Logger | None = None) -> dict[str, str]:

@@ -107,6 +107,12 @@ class DriveHudsSource:
         service_account_file: str | None = None,
     ) -> None:
         self.folder_id = folder_id
+
+        if not self.folder_id:
+            raise ValueError(
+                "HUDS Drive folder ID ontbreekt. Stel HUDS_DRIVE_FOLDER_ID in of geef folder_id mee."
+            )
+
         sa_file = service_account_file or SERVICE_ACCOUNT_FILE
 
         if not sa_file or not os.path.exists(sa_file):

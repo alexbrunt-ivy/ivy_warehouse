@@ -37,8 +37,6 @@ jobs:
           echo "GOOGLE_APPLICATION_CREDENTIALS=$RUNNER_TEMP/gcp-key.json" >> $GITHUB_ENV
 
       - name: Ingest HUDS data
-        env:
-          HUDS_DRIVE_FOLDER_ID: ${{ secrets.HUDS_DRIVE_FOLDER_ID }}
         run: uv run python flows/huds_flow.py
 
       - name: Install packages
