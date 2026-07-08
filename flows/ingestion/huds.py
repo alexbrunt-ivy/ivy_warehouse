@@ -210,6 +210,8 @@ def _file_name_to_table(file_name: str) -> str:
         .replace(" ", "_")
         .replace("-", "_")
     )
+    if sanitized in {"data_werknemers_intern", "werknemers_intern"}:
+        return "raw_data_werknemers_intern"
     return f"raw_huds_{sanitized}"
 
 
@@ -217,6 +219,14 @@ def _load_to_bigquery(df: pd.DataFrame, table_name: str) -> None:
     """Laad een DataFrame als een volledige vervanging (WRITE_TRUNCATE) in BigQuery."""
     client = bigquery.Client(project=BQ_PROJECT)
     table_ref = f"{BQ_PROJECT}.{BQ_DATASET}.{table_name}"
+
+    try:
+        existing = client.get_table(table_ref)
+        if existing.table_type == "EXTERNAL":
+            client.delete_table(table_ref)
+            logger.info(f"  Verwijderd externe tabel {table_ref} (wordt vervangen door native tabel).")
+    except Exception:
+        pass
 
     logger.info(f"  → Laden naar {table_ref} ({len(df)} rijen)...")
 

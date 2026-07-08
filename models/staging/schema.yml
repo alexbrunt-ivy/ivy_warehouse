@@ -206,22 +206,22 @@ models:
     description: >
       Bedrijven uit HubSpot, gereduceerd naar kernvelden en opgeschoond met juiste datatypes.
     columns:
-      - name: company_id
+      - name: bedrijf_id
         description: Uniek HubSpot ID van het bedrijf
         data_tests:
           - unique
           - not_null
-      - name: company_name
+      - name: bedrijfsnaam
         description: Bedrijfsnaam uit HubSpot
       - name: normalized_name
         description: Opgeschoonde bedrijfsnaam voor fuzzy matching
-      - name: domain
+      - name: website
         description: Primair domein van het bedrijf
       - name: created_at
         description: Technische aanmaakdatum van het HubSpot record
       - name: updated_at
         description: Laatste technische wijzigingsdatum van het HubSpot record
-      - name: annual_revenue
+      - name: jaarlijkse_omzet
         description: Jaaromzet zoals geregistreerd in HubSpot
       - name: hs_analytics_source
         description: Originele analytics bron van het bedrijf

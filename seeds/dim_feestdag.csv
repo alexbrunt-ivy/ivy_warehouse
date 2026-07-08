@@ -1,4 +1,4 @@
-holiday_date,holiday_name,is_official
+date,holiday_name,is_official
 2026-01-01,Nieuwjaarsdag,true
 2026-04-03,Goede Vrijdag,true
 2026-04-05,Eerste Paasdag,true
@@ -11,7 +11,6 @@ holiday_date,holiday_name,is_official
 2026-12-25,Eerste Kerstdag,true
 2026-12-26,Tweede Kerstdag,true
 2026-12-31,Oudjaarsdag,true
-
 2027-01-01,Nieuwjaarsdag,true
 2027-03-26,Goede Vrijdag,true
 2027-03-28,Eerste Paasdag,true
@@ -24,7 +23,6 @@ holiday_date,holiday_name,is_official
 2027-12-25,Eerste Kerstdag,true
 2027-12-26,Tweede Kerstdag,true
 2027-12-31,Oudjaarsdag,true
-
 2028-01-01,Nieuwjaarsdag,true
 2028-04-14,Goede Vrijdag,true
 2028-04-16,Eerste Paasdag,true
@@ -37,7 +35,6 @@ holiday_date,holiday_name,is_official
 2028-12-25,Eerste Kerstdag,true
 2028-12-26,Tweede Kerstdag,true
 2028-12-31,Oudjaarsdag,true
-
 2029-01-01,Nieuwjaarsdag,true
 2029-03-30,Goede Vrijdag,true
 2029-04-01,Eerste Paasdag,true
@@ -50,7 +47,6 @@ holiday_date,holiday_name,is_official
 2029-12-25,Eerste Kerstdag,true
 2029-12-26,Tweede Kerstdag,true
 2029-12-31,Oudjaarsdag,true
-
 2030-01-01,Nieuwjaarsdag,true
 2030-04-19,Goede Vrijdag,true
 2030-04-21,Eerste Paasdag,true
