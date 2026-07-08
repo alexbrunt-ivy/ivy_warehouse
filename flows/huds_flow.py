@@ -1,3 +1,4 @@
+import logging
 import os
 
 from prefect import flow, task, get_run_logger
@@ -10,6 +11,34 @@ DRIVE_FOLDER_ID = os.getenv(
     "HUDS_DRIVE_FOLDER_ID",
     "11G124iUsexfoXE9i9D5dVKhdnQcSyjTW",
 )
+
+
+def run_huds_ingestion(log: logging.Logger | None = None) -> dict[str, str]:
+    """
+    Haalt alle HUDS-bestanden op uit Google Drive en laadt ze naar BigQuery.
+
+    Gebruikt standaard logging (geen Prefect-server nodig) zodat dit ook in CI kan draaien.
+    """
+    logger = log or logging.getLogger("huds_flow")
+    logger.info(f"HUDS-ingestie gestart (Drive-map: {DRIVE_FOLDER_ID})")
+
+    source = DriveHudsSource(folder_id=DRIVE_FOLDER_ID)
+    results = ingest_huds(source)
+
+    ok = [name for name, status in results.items() if status == "ok"]
+    errors = {name: status for name, status in results.items() if status.startswith("error")}
+    skipped = [name for name, status in results.items() if status.startswith("skipped")]
+
+    logger.info(f"Klaar: {len(ok)} geladen, {len(skipped)} overgeslagen, {len(errors)} fouten.")
+
+    if errors:
+        for name, msg in errors.items():
+            logger.error(f"  ✗ {name}: {msg}")
+        raise RuntimeError(
+            f"HUDS-ingestie afgerond met {len(errors)} fout(en): {list(errors.keys())}"
+        )
+
+    return results
 
 
 @task(
@@ -27,25 +56,7 @@ def ingest_huds_task() -> None:
       - Vervang DriveHudsSource door ApiHudsSource
       - De rest van de logica blijft ongewijzigd
     """
-    logger = get_run_logger()
-    logger.info(f"HUDS-ingestie gestart (Drive-map: {DRIVE_FOLDER_ID})")
-
-    source = DriveHudsSource(folder_id=DRIVE_FOLDER_ID)
-    results = ingest_huds(source)
-
-    # Samenvatting loggen
-    ok = [name for name, status in results.items() if status == "ok"]
-    errors = {name: status for name, status in results.items() if status.startswith("error")}
-    skipped = [name for name, status in results.items() if status.startswith("skipped")]
-
-    logger.info(f"Klaar: {len(ok)} geladen, {len(skipped)} overgeslagen, {len(errors)} fouten.")
-
-    if errors:
-        for name, msg in errors.items():
-            logger.error(f"  ✗ {name}: {msg}")
-        raise RuntimeError(
-            f"HUDS-ingestie afgerond met {len(errors)} fout(en): {list(errors.keys())}"
-        )
+    run_huds_ingestion(get_run_logger())
 
 
 @flow(name="ingest-huds", log_prints=True)
@@ -60,4 +71,5 @@ def ingest_huds_flow() -> None:
 
 
 if __name__ == "__main__":
-    ingest_huds_flow()
+    logging.basicConfig(level=logging.INFO)
+    run_huds_ingestion()
