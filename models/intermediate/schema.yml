@@ -61,9 +61,8 @@ models:
       Bedoeld als basis voor een latere fct_uren_registraties.
     columns:
       - name: uren_nummer
-        description: Uniek volgnummer van de urenregistratie
+        description: Nummer uit de HUDS uren-export (geen unieke registratie-ID)
         data_tests:
-          - unique
           - not_null
       - name: project_id
         description: Project ID uit HUDS op basis van voorlopige matching op projectnaam
@@ -94,9 +93,8 @@ models:
       Inclusief gesplitste projectnamen en een uniforme betalingsstatus.
     columns:
       - name: factuur_nummer
-        description: Uniek factuurnummer
+        description: Factuurnummer (niet uniek op zichzelf; hergebruikt per project)
         data_tests:
-          - unique
           - not_null
       - name: huds_bedrijf_id
         description: ID van het gekoppelde HUDS bedrijf
@@ -104,3 +102,9 @@ models:
         description: Afgeleid projectnummer uit de originele factuurstring
       - name: factuur_status_categorie
         description: Uniforme status of de factuur betaald, open of te laat is
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - factuur_nummer
+              - project_nummer

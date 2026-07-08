@@ -19,7 +19,19 @@ opgeschoond as (
 
     from bron
     where Projectnummer is not null
+        and trim(Rol) != ''
+
+),
+
+gededupliceerd as (
+
+    select *
+    from opgeschoond
+    qualify row_number() over (
+        partition by project_nummer, rol, start_datum
+        order by uurtarief desc
+    ) = 1
 
 )
 
-select * from opgeschoond
+select * from gededupliceerd

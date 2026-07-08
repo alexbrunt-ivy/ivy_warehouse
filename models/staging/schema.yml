@@ -28,10 +28,11 @@ models:
       Facturen uit HUDS, opgeschoond en met juiste datatypes.
     columns:
       - name: factuur_nummer
-        description: Uniek factuurnummer
+        description: Factuurnummer (niet uniek op zichzelf; hergebruikt per project)
         data_tests:
-          - unique
           - not_null
+      - name: project_nummer
+        description: Afgeleid projectnummer uit project_raw
       - name: factuurdatum
         description: Datum van de factuur
         data_tests:
@@ -51,6 +52,12 @@ models:
               arguments:
                 values: [true, false]
                 quote: false
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - factuur_nummer
+              - project_nummer
   # ──────────────────────────────────────────────────────────────────────
   # stg_huds_projecten
   # ──────────────────────────────────────────────────────────────────────
@@ -84,10 +91,16 @@ models:
     description: >
       Urenregistraties uit HUDS, opgeschoond en met juiste datatypes.
     columns:
+      - name: project_raw
+        description: Originele projectstring uit HUDS (bijv. "12345 - Projectnaam")
       - name: project
-        description: Projectnaam waarop de uren zijn geboekt
-        data_tests:
-          - not_null
+        description: Alias van project_raw; behouden voor backward compatibility
+      - name: project_nummer
+        description: Afgeleid projectnummer uit het begin van project_raw
+      - name: projectnaam_uit_veld
+        description: Afgeleide projectnaam na verwijderen van nummer en scheidingstekens
+      - name: is_project_leeg
+        description: True wanneer project_raw null of leeg is
       - name: uren
         description: Aantal gewerkte uren
         data_tests:
@@ -127,10 +140,16 @@ models:
     description: >
       Maandelijks facturatie-overzicht per project met uren per rol.
     columns:
+      - name: project_raw
+        description: Originele projectstring uit HUDS
       - name: project
-        description: Projectnaam
-        data_tests:
-          - not_null
+        description: Alias van project_raw
+      - name: project_nummer
+        description: Afgeleid projectnummer uit project_raw
+      - name: projectnaam_uit_veld
+        description: Afgeleide projectnaam uit project_raw
+      - name: is_project_leeg
+        description: True wanneer project_raw null of leeg is
       - name: periode
         description: De maand (als datum) van het overzicht
         data_tests:
@@ -143,8 +162,10 @@ models:
       - dbt_utils.unique_combination_of_columns:
           arguments:
             combination_of_columns:
-              - project
+              - project_raw
               - periode
+          config:
+            where: "not is_project_leeg"
 
   # ──────────────────────────────────────────────────────────────────────
   # stg_huds_uren_omzet_planning
@@ -153,10 +174,16 @@ models:
     description: >
       Geplande uren en omzet per project per maand, uitgesplitst per rol.
     columns:
+      - name: project_raw
+        description: Originele projectstring uit HUDS
       - name: project
-        description: Projectnaam
-        data_tests:
-          - not_null
+        description: Alias van project_raw
+      - name: project_nummer
+        description: Afgeleid projectnummer uit project_raw
+      - name: projectnaam_uit_veld
+        description: Afgeleide projectnaam uit project_raw
+      - name: is_project_leeg
+        description: True wanneer project_raw null of leeg is
       - name: periode
         description: De maand (als datum) van de planning
         data_tests:
@@ -169,8 +196,10 @@ models:
       - dbt_utils.unique_combination_of_columns:
           arguments:
             combination_of_columns:
-              - project
+              - project_raw
               - periode
+          config:
+            where: "not is_project_leeg"
 
   # ──────────────────────────────────────────────────────────────────────
   # stg_huds_uren_omzet_realisatie
@@ -179,10 +208,16 @@ models:
     description: >
       Gerealiseerde uren en omzet per project per maand, uitgesplitst per rol.
     columns:
+      - name: project_raw
+        description: Originele projectstring uit HUDS
       - name: project
-        description: Projectnaam
-        data_tests:
-          - not_null
+        description: Alias van project_raw
+      - name: project_nummer
+        description: Afgeleid projectnummer uit project_raw
+      - name: projectnaam_uit_veld
+        description: Afgeleide projectnaam uit project_raw
+      - name: is_project_leeg
+        description: True wanneer project_raw null of leeg is
       - name: periode
         description: De maand (als datum) van de realisatie
         data_tests:
@@ -195,8 +230,10 @@ models:
       - dbt_utils.unique_combination_of_columns:
           arguments:
             combination_of_columns:
-              - project
+              - project_raw
               - periode
+          config:
+            where: "not is_project_leeg"
               
   - name: stg_huds_werknemers_intern
     description: >

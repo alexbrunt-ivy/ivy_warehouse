@@ -8,7 +8,7 @@ opgeschoond as (
 
     select
         -- === Attributen ===
-        trim(Project)                               as project,
+        {{ huds_parse_project('Project') }},
         trim(Account)                               as account,
         trim(Type_dienst)                           as type_dienst,
         trim(Business_entity)                       as business_entity,
@@ -36,8 +36,8 @@ opgeschoond as (
         cast(Omzet_projectengineer as FLOAT64)      as omzet_projectengineer
 
     from bron
-    where Project is not null
 
 )
 
 select * from opgeschoond
+where totaal_uren > 0

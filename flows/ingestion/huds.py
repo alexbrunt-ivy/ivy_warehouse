@@ -34,6 +34,19 @@ BQ_PROJECT = os.getenv("BQ_PROJECT_ID", "ivy-warehouse")
 BQ_DATASET = "raw_huds"
 SERVICE_ACCOUNT_FILE = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
 
+# Tabellen die dbt staging-modellen nodig hebben; moeten native BQ-tabellen zijn (geen Sheets).
+REQUIRED_RAW_TABLES = (
+    "raw_huds_bedrijven",
+    "raw_huds_projecten",
+    "raw_huds_facturen",
+    "raw_huds_facturatie_overzicht",
+    "raw_huds_uren",
+    "raw_huds_uren_omzet_planning",
+    "raw_huds_uren_omzet_realisatie",
+    "raw_huds_uurtarieven",
+    "raw_data_werknemers_intern",
+)
+
 # Drive API heeft alleen leesrechten nodig
 _DRIVE_SCOPES = ["https://www.googleapis.com/auth/drive.readonly"]
 
@@ -146,7 +159,6 @@ class DriveHudsSource:
             )
             .execute()
         )
-        print(response)
 
         all_files = response.get("files", [])
         supported = [f for f in all_files if f["mimeType"] in _SUPPORTED_MIME_TYPES]
@@ -222,24 +234,17 @@ def _file_name_to_table(file_name: str) -> str:
 
 
 def _load_to_bigquery(df: pd.DataFrame, table_name: str) -> None:
-    """Laad een DataFrame als een volledige vervanging (WRITE_TRUNCATE) in BigQuery."""
+    """
+    Laad een DataFrame naar BigQuery via een staging-tabel.
+
+    De productietabel blijft intact als ophalen of laden naar staging mislukt.
+    Alleen na een geslaagde staging-load wordt de doeltabel vervangen.
+    """
     client = bigquery.Client(project=BQ_PROJECT)
     table_ref = f"{BQ_PROJECT}.{BQ_DATASET}.{table_name}"
+    staging_ref = f"{BQ_PROJECT}.{BQ_DATASET}.{table_name}__staging"
 
-    try:
-        existing = client.get_table(table_ref)
-        if existing.table_type == "EXTERNAL":
-            client.delete_table(table_ref)
-            logger.info(f"  Verwijderd externe tabel {table_ref} (wordt vervangen door native tabel).")
-    except Exception:
-        pass
-
-    logger.info(f"  → Laden naar {table_ref} ({len(df)} rijen)...")
-
-    # Alles naar string om type-conflicten bij autodetect te vermijden
     df = df.copy().astype(str).replace("nan", None).replace("None", None)
-
-    # Warehouse-metadata toevoegen
     df["_loaded_at"] = str(pd.Timestamp.utcnow())
 
     job_config = bigquery.LoadJobConfig(
@@ -247,9 +252,28 @@ def _load_to_bigquery(df: pd.DataFrame, table_name: str) -> None:
         autodetect=True,
     )
 
-    job = client.load_table_from_dataframe(df, table_ref, job_config=job_config)
-    job.result()
-    logger.info(f"  ✓ {table_ref} geladen.")
+    client.delete_table(staging_ref, not_found_ok=True)
+
+    logger.info(f"  → Laden naar staging {staging_ref} ({len(df)} rijen)...")
+    try:
+        job = client.load_table_from_dataframe(df, staging_ref, job_config=job_config)
+        job.result()
+    except Exception:
+        client.delete_table(staging_ref, not_found_ok=True)
+        raise
+
+    try:
+        client.delete_table(table_ref, not_found_ok=True)
+        copy_job = client.copy_table(staging_ref, table_ref)
+        copy_job.result()
+        logger.info(f"  ✓ {table_ref} geladen.")
+        client.delete_table(staging_ref, not_found_ok=True)
+    except Exception:
+        logger.error(
+            f"  Vervangen van {table_ref} mislukt; "
+            f"staging blijft beschikbaar op {staging_ref} voor herstel."
+        )
+        raise
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -297,3 +321,32 @@ def ingest_huds(source: HudsDataSource) -> dict[str, str]:
             # Ga door met de overige bestanden
 
     return results
+
+
+def verify_huds_raw_tables() -> None:
+    """Controleer dat vereiste raw-tabellen bestaan en geen externe Sheets meer zijn."""
+    client = bigquery.Client(project=BQ_PROJECT)
+    external_tables: list[str] = []
+    missing_tables: list[str] = []
+
+    for table_name in REQUIRED_RAW_TABLES:
+        table_ref = f"{BQ_PROJECT}.{BQ_DATASET}.{table_name}"
+        try:
+            table = client.get_table(table_ref)
+        except Exception:
+            missing_tables.append(table_name)
+            continue
+
+        if table.table_type == "EXTERNAL":
+            external_tables.append(table_name)
+
+    if missing_tables or external_tables:
+        details: list[str] = []
+        if missing_tables:
+            details.append(f"ontbrekend: {missing_tables}")
+        if external_tables:
+            details.append(
+                f"nog extern (Google Sheet): {external_tables}. "
+                "Deel de Drive-map met het service account en draai ingestie opnieuw."
+            )
+        raise RuntimeError("HUDS raw-tabellen niet klaar voor dbt — " + "; ".join(details))
