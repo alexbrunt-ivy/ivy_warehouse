@@ -1,0 +1,11 @@
+ivy_bigquery:
+  target: ci
+  outputs:
+    ci:
+      type: bigquery
+      method: service-account
+      project: ivy-warehouse
+      dataset: ci
+      threads: 4
+      location: europe-west4
+      keyfile: "{{ env_var('GOOGLE_APPLICATION_CREDENTIALS') }}"

@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      DBT_PROFILES_DIR: ~/.dbt
+      DBT_PROFILES_DIR: ${{ github.workspace }}/.github/dbt
 
     steps:
       - name: Checkout
@@ -33,25 +33,6 @@ jobs:
         run: |
           echo "$GCP_SERVICE_ACCOUNT" > $RUNNER_TEMP/gcp-key.json
           echo "GOOGLE_APPLICATION_CREDENTIALS=$RUNNER_TEMP/gcp-key.json" >> $GITHUB_ENV
-
-      - name: Create dbt profile
-        run: |
-          mkdir -p ~/.dbt
-
-          cat > ~/.dbt/profiles.yml <<EOF
-          ivy_bigquery:
-            target: ci
-
-            outputs:
-              ci:
-                type: bigquery
-                method: service-account
-                project: ivy-warehouse
-                dataset: ci
-                threads: 4
-                location: europe-west4
-                keyfile: "$GOOGLE_APPLICATION_CREDENTIALS"
-          EOF
 
       - name: Install packages
         run: dbt deps
