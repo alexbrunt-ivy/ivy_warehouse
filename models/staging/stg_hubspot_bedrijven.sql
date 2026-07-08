@@ -8,7 +8,7 @@ opgeschoond as (
 
     select
         -- === Keys ===
-        trim(id) as company_id,
+        trim(id) as bedrijf_id,
 
         -- === Timestamps ===
         coalesce(
@@ -56,20 +56,20 @@ opgeschoond as (
         ) as loaded_at,
 
         -- === Bedrijfsprofiel ===
-        trim(name) as company_name,
+        trim(name) as bedrijfsnaam,
         REGEXP_REPLACE(
-            REGEXP_REPLACE(lower(trim(name)), r'\b(b\.v\.|bv|n\.v\.|nv|v\.o\.f\.|vof|group|groep)\b', ''),
+            REGEXP_REPLACE(lower(trim(name)), r'\b(b\.v\.|bv|n\.v\.|nv|v\.o\.f\.|vof|group|groep|stichting|vereniging|coöperatie|cooporatie|holding)\b', ''),
             r'[^a-z0-9]', 
             ''
         ) as normalized_name,
-        trim(domain) as domain,
+        trim(domain) as website,
         trim(about_us) as about_us,
-        trim(description) as description,
-        trim(address) as address,
-        trim(address2) as address2,
-        trim(city) as city,
-        trim(country) as country,
-        trim(facebook_company_page) as facebook_company_page,
+        trim(description) as beschrijving,
+        trim(address) as straat,
+        trim(address2) as huisnummer,
+        trim(city) as stad,
+        trim(country) as land,
+        trim(facebook_company_page) as facebook_pagina,
 
         -- === Teamleader / sales ===
         safe_cast(trim(aantal_deals_teamleader) as INT64) as aantal_deals_teamleader,
@@ -77,8 +77,8 @@ opgeschoond as (
         trim(first_conversion_event_name) as first_conversion_event_name,
 
         -- === Financieel ===
-        safe_cast(trim(annualrevenue) as NUMERIC) as annual_revenue,
-        safe_cast(trim(founded_year) as INT64) as founded_year,
+        safe_cast(trim(annualrevenue) as NUMERIC) as jaarlijkse_omzet,
+        safe_cast(trim(founded_year) as INT64) as jaar_opgegericht,
 
         -- === HubSpot metadata ===
         trim(hs_additional_domains) as hs_additional_domains,

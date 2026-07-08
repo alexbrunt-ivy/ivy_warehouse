@@ -18,7 +18,7 @@ opgeschoond as (
         trim(Beschrijving)                      as beschrijving,
 
         -- === Datums ===
-        Periode                                 as periode,
+        cast(Periode as DATE)                   as periode,
 
         -- === Financieel ===
         cast(Totaal_uren as FLOAT64)            as totaal_uren,
