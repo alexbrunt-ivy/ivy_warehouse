@@ -1,50 +1,51 @@
 version: 2
 
 sources:
-  # De HUDS bron: handmatige exports uit Betty Blocks.
+  # De HUDS bron: handmatige exports uit Betty Blocks, geladen via Google Drive.
+  # Tabelnames worden automatisch afgeleid van de bestandsnaam in Drive:
+  #   '{Bestandsnaam}' → raw_huds_{bestandsnaam_lowercase}
+  # Nieuwe bestanden in de Drive-map worden automatisch opgepikt door de flow.
   - name: huds
-    database: ivy-warehouse   # Jouw BigQuery Project ID
-    schema: raw_huds              # De dataset naam in BigQuery
+    database: ivy-warehouse
+    schema: raw_huds
     description: >
-      exports uit HUDS, opgehaald vanuit een google drive folder
+      Exports uit HUDS (Betty Blocks), automatisch geladen vanuit een
+      Google Drive-map via de Prefect HUDS-ingestie-flow.
 
     tables:
       - name: raw_huds_uurtarieven
-        description: tarieven per project per rol
+        description: Tarieven per project per rol
 
       - name: raw_huds_facturen
-        description: facturen uit huds
-
-      - name: raw_huds_uren
-        description: uren uit huds
-
-      - name: raw_huds_bedrijven
-        description: klantgegevens uit huds
-
-      - name: raw_huds_projecten
-        description: projecten uit huds
+        description: Facturen uit HUDS
 
       - name: raw_huds_facturatie_overzicht
-        description: maandelijks facturatie-overzicht per project met uren per rol
+        description: Maandelijks facturatie-overzicht per project met uren per rol
+
+      - name: raw_huds_uren
+        description: Uren uit HUDS
 
       - name: raw_huds_uren_omzet_planning
-        description: geplande uren en omzet per project per maand per rol
+        description: Geplande uren en omzet per project per maand per rol
 
       - name: raw_huds_uren_omzet_realisatie
-        description: gerealiseerde uren en omzet per project per maand per rol
-        
+        description: Gerealiseerde uren en omzet per project per maand per rol
+
+      - name: raw_huds_bedrijven
+        description: Klantgegevens uit HUDS
+
+      - name: raw_huds_projecten
+        description: Projecten uit HUDS
+
+      - name: raw_huds_project_voortgang_datawarehouse
+        description: Project voortgang overzicht voor het datawarehouse
+
+      - name: raw_huds_werknemers
+        description: Werknemersgegevens uit HUDS
+
       - name: raw_data_werknemers_intern
-        description: interne werknemersgegevens uit huds
+        description: Interne werknemersgegevens uit HUDS
 
-
-
-  # De bron voor Google Sheets data.
-# - name: sheets
-#   database: ivy-warehouse
-#   schema: raw_sheets
-#   description: >
-#     data vanuit google sheets, met een python script geinjecteerd in bigquery
-#    tables:
 
   # De bron voor HubSpot CRM data.
   - name: hubspot

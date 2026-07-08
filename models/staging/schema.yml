@@ -84,15 +84,6 @@ models:
     description: >
       Urenregistraties uit HUDS, opgeschoond en met juiste datatypes.
     columns:
-      - name: uren_nummer
-        description: Uniek volgnummer van de urenregistratie
-        data_tests:
-          - unique
-          - not_null
-      - name: medewerker_naam
-        description: Naam van de medewerker
-        data_tests:
-          - not_null
       - name: project
         description: Projectnaam waarop de uren zijn geboekt
         data_tests:

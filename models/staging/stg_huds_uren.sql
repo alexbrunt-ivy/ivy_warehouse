@@ -12,8 +12,8 @@ opgeschoond as (
 
         -- === Timestamps ===
         Created_at                          as created_at,
-        Start                               as start_tijdstip,
-        Einde                               as einde_tijdstip,
+        DATETIME(SAFE.PARSE_TIMESTAMP('%Y-%m-%d %H:%M:%S %Ez', Start),'Europe/Amsterdam') AS start_tijdstip,
+        DATETIME(SAFE.PARSE_TIMESTAMP('%Y-%m-%d %H:%M:%S %Ez', Einde),'Europe/Amsterdam') AS einde_tijdstip,
 
         -- === Medewerker ===
         trim(Naam)                          as medewerker_naam,
@@ -25,7 +25,7 @@ opgeschoond as (
         trim(Bedrijfs_Entiteit)             as bedrijfsentiteit,
         trim(Kostenplaats)                  as kostenplaats,
         trim(Afdeling)                      as afdeling,
-        trim(Business_entity)              as business_entity,
+        trim(Business_entity)               as business_entity,
         trim(Regio)                         as regio,
 
         -- === Project ===
@@ -38,7 +38,7 @@ opgeschoond as (
         -- === Uren & Tijd ===
         cast(Tijd_gewerkt as INT64)         as tijd_gewerkt_minuten,
         cast(Pauze_in_minuten as INT64)     as pauze_minuten,
-        cast(Uren as FLOAT64)              as uren,
+        cast(Uren as FLOAT64)               as uren,
 
         -- === Status & Locatie ===
         trim(Status)                        as status,
@@ -48,7 +48,7 @@ opgeschoond as (
         trim(Tarief)                        as tarief
 
     from bron
-    where Nummer is not null
+    where Project is not null
 
 )
 

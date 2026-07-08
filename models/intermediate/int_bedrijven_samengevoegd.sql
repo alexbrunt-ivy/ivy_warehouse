@@ -15,22 +15,22 @@ final as (
     select
         -- === Keys ===
         huds.bedrijf_id,
-        hubspot.company_id as hubspot_bedrijf_id,
+        hubspot.bedrijf_id as hubspot_bedrijf_id,
 
         -- === Attributen ===
-        coalesce(huds.bedrijfsnaam, hubspot.company_name) as bedrijfsnaam,
+        coalesce(huds.bedrijfsnaam, hubspot.bedrijfsnaam) as bedrijfsnaam,
         huds.bedrijfsnaam as huds_bedrijfsnaam,
-        hubspot.company_name as hubspot_bedrijfsnaam,
+        hubspot.bedrijfsnaam as hubspot_bedrijfsnaam,
         huds.normalized_name,
-        hubspot.domain as website,
+        hubspot.website as website,
         huds.beschrijving as huds_beschrijving,
-        hubspot.description as hubspot_beschrijving,
+        hubspot.beschrijving as hubspot_beschrijving,
         huds.sales_lead,
 
         -- === Locatie ===
-        NULLIF(TRIM(CONCAT(COALESCE(hubspot.address, ''), ' ', COALESCE(hubspot.address2, ''))), '') as adres,
-        hubspot.city as stad,
-        hubspot.country as land,
+        NULLIF(TRIM(CONCAT(COALESCE(hubspot.straat, ''), ' ', COALESCE(hubspot.huisnummer, ''))), '') as adres,
+        hubspot.stad as stad,
+        hubspot.land as land,
 
         -- === Timestamps ===
         huds.aangemaakt_op as huds_aangemaakt_op,
