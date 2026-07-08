@@ -3,7 +3,7 @@ import os
 
 from prefect import flow, task, get_run_logger
 
-from flows.ingestion.huds import DriveHudsSource, ingest_huds
+from flows.ingestion.huds import DriveHudsSource, ingest_huds, verify_huds_raw_tables
 
 # Folder ID van de Drive-map met HUDS-exports.
 # Staat ook in .env als HUDS_DRIVE_FOLDER_ID zodat je het per omgeving kunt overschrijven.
@@ -28,6 +28,12 @@ def run_huds_ingestion(log: logging.Logger | None = None) -> dict[str, str]:
 
     logger.info(f"Klaar: {len(ok)} geladen, {len(skipped)} overgeslagen, {len(errors)} fouten.")
 
+    if not ok:
+        raise RuntimeError(
+            "Geen HUDS-bestanden succesvol geladen. "
+            f"Resultaten: {results}. Controleer of de Drive-map gedeeld is met het service account."
+        )
+
     if errors:
         for name, msg in errors.items():
             logger.error(f"  ✗ {name}: {msg}")
@@ -35,6 +41,7 @@ def run_huds_ingestion(log: logging.Logger | None = None) -> dict[str, str]:
             f"HUDS-ingestie afgerond met {len(errors)} fout(en): {list(errors.keys())}"
         )
 
+    verify_huds_raw_tables()
     return results
 
 

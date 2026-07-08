@@ -19,7 +19,7 @@ opgeschoond as (
         trim(Prodecure)                                         as procedure_type,
         trim(Status)                                            as status,
         trim(Periode)                                           as periode,
-        trim(Project)                                           as project,
+        {{ huds_parse_project('Project') }},
         trim(Opdrachtgever)                                     as opdrachtgever,
         trim(Bedrijfsentiteit)                                  as bedrijfsentiteit,
 

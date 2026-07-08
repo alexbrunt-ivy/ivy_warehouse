@@ -29,7 +29,7 @@ opgeschoond as (
         trim(Regio)                         as regio,
 
         -- === Project ===
-        trim(Project)                       as project,
+        {{ huds_parse_project('Project') }},
         trim(Opdrachtgever)                 as opdrachtgever,
         trim(Type_dienst)                   as type_dienst,
         trim(Projectmanagers)               as project_managers,
@@ -48,7 +48,6 @@ opgeschoond as (
         trim(Tarief)                        as tarief
 
     from bron
-    where Project is not null
 
 )
 
