@@ -12,6 +12,7 @@ jobs:
 
     env:
       DBT_PROFILES_DIR: ${{ github.workspace }}/.github/dbt
+      PYTHONPATH: ${{ github.workspace }}
 
     steps:
       - name: Checkout
