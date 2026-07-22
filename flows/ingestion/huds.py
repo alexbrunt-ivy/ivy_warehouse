@@ -241,7 +241,10 @@ class DriveHudsSource:
             return pd.DataFrame()
 
         # Eerste rij = kolomnamen, rest = data
-        headers = rows[0]
+        raw_headers = rows[0]
+        # Spaties vervangen door underscores zodat kolomnamen overeenkomen
+        # met de oude CSV-export (bijv. "Bedrijf ID" → "Bedrijf_ID")
+        headers = [h.replace(" ", "_") for h in raw_headers]
         data = rows[1:]
         # Rijen aanvullen tot dezelfde lengte als headers
         padded = [row + [""] * (len(headers) - len(row)) for row in data]
