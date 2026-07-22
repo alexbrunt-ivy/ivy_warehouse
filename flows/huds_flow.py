@@ -17,12 +17,22 @@ DRIVE_FOLDER_ID = os.getenv("HUDS_DRIVE_FOLDER_ID") or "11G124iUsexfoXE9i9D5dVKh
 LOCAL_FOLDER_PATH = os.getenv("HUDS_LOCAL_FOLDER")
 
 
+# Stel HUDS_SKIP_DRIVE=true in (bijv. als GitHub Actions Secret) om de Drive-stap over te slaan in CI.
+SKIP_DRIVE = os.getenv("HUDS_SKIP_DRIVE", "").lower() in {"1", "true", "yes"}
+
+
 def run_huds_ingestion(log: logging.Logger | None = None, local_folder: str | None = None) -> dict[str, str]:
     """
     Haalt alle HUDS-bestanden op uit Google Drive of een lokale map en laadt ze naar BigQuery.
+
+    Stel HUDS_SKIP_DRIVE=true in om de Drive-stap over te slaan (handig in CI/CD).
     """
     logger = log or logging.getLogger("huds_flow")
-    
+
+    if SKIP_DRIVE:
+        logger.warning("HUDS Drive-ingestie overgeslagen (HUDS_SKIP_DRIVE=true).")
+        return {}
+
     target_local = local_folder or LOCAL_FOLDER_PATH
     if target_local:
         logger.info(f"HUDS-ingestie gestart vanuit LOKALE map: '{target_local}'")
@@ -39,7 +49,16 @@ def run_huds_ingestion(log: logging.Logger | None = None, local_folder: str | No
 
     logger.info(f"Klaar: {len(ok)} geladen, {len(skipped)} overgeslagen, {len(errors)} fouten.")
 
-    if not ok:
+    # Geen bestanden gevonden → waarschuwing maar geen crash (bijv. lege testmap in CI)
+    if not results:
+        logger.warning(
+            "Geen bestanden gevonden in de Drive-map. "
+            "Controleer of de map gedeeld is met het service account of stel HUDS_SKIP_DRIVE=true in."
+        )
+        return results
+
+    # Bestanden gevonden maar allemaal mislukt → dit is wél een fout
+    if results and not ok:
         raise RuntimeError(
             "Geen HUDS-bestanden succesvol geladen. "
             f"Resultaten: {results}. Controleer of de Drive-map gedeeld is met het service account."
