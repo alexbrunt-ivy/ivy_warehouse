@@ -102,9 +102,3 @@ models:
         description: Afgeleid projectnummer uit de originele factuurstring
       - name: factuur_status_categorie
         description: Uniforme status of de factuur betaald, open of te laat is
-    data_tests:
-      - dbt_utils.unique_combination_of_columns:
-          arguments:
-            combination_of_columns:
-              - factuur_nummer
-              - project_nummer

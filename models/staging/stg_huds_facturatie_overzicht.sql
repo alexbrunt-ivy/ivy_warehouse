@@ -12,7 +12,7 @@ opgeschoond as (
         trim(Account)                           as account,
         trim(Goedkeuring)                       as goedkeuring,
         trim(Bedrijfsentiteit)                  as bedrijfsentiteit,
-        trim(Uren_Status)                       as uren_status,
+        trim(`Uren Status`)                       as uren_status,
         trim(Status)                            as status,
         trim(`Procedure`)                       as procedure_type,
         trim(Beschrijving)                      as beschrijving,
@@ -21,15 +21,15 @@ opgeschoond as (
         cast(Periode as DATE)                   as periode,
 
         -- === Financieel ===
-        cast(Totaal_uren as FLOAT64)            as totaal_uren,
-        cast(Totaal_omzet as FLOAT64)           as totaal_omzet,
-        cast(Niet_gefactureerd as FLOAT64)      as niet_gefactureerd,
+        safe_cast(nullif(trim(`Totaal uren`), '') as FLOAT64)            as totaal_uren,
+        safe_cast(nullif(trim(`Totaal omzet`), '') as FLOAT64)           as totaal_omzet,
+        safe_cast(nullif(trim(`Niet gefactureerd`), '') as FLOAT64)      as niet_gefactureerd,
 
         -- === Uren per Rol ===
-        cast(Uren_projectmanager as FLOAT64)    as uren_projectmanager,
-        cast(Uren_projectleider as FLOAT64)     as uren_projectleider,
-        cast(Uren_projectengineer as FLOAT64)   as uren_projectengineer,
-        cast(Uren_medewerker as FLOAT64)        as uren_medewerker
+        safe_cast(nullif(trim(`Uren projectmanager`), '') as FLOAT64)    as uren_projectmanager,
+        safe_cast(nullif(trim(`Uren projectleider`), '') as FLOAT64)     as uren_projectleider,
+        safe_cast(nullif(trim(`Uren projectengineer`), '') as FLOAT64)   as uren_projectengineer,
+        safe_cast(nullif(trim(`Uren medewerker`), '') as FLOAT64)        as uren_medewerker
 
     from bron
 

@@ -242,8 +242,8 @@ class DriveHudsSource:
 
         # Eerste rij = kolomnamen, rest = data
         raw_headers = rows[0]
-        # Spaties vervangen door underscores zodat kolomnamen overeenkomen
-        # met de oude CSV-export (bijv. "Bedrijf ID" → "Bedrijf_ID")
+        # Spaties → underscores: de Sheets API geeft "Bedrijf ID" terug, maar
+        # de dbt staging-modellen verwachten "Bedrijf_ID" (zoals de oude CSV-export deed).
         headers = [h.replace(" ", "_") for h in raw_headers]
         data = rows[1:]
         # Rijen aanvullen tot dezelfde lengte als headers

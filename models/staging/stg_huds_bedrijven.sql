@@ -8,7 +8,7 @@ opgeschoond as (
 
     select
         -- === Keys ===
-        cast(trim(Bedrijf_ID) as STRING)        as bedrijf_id,
+        cast(trim(`Bedrijf ID`) as STRING)        as bedrijf_id,
 
         -- === Attributen ===
         trim(Naam)                               as bedrijfsnaam,
@@ -18,13 +18,13 @@ opgeschoond as (
             ''
         )                                        as normalized_name,
         trim(Beschrijving)                       as beschrijving,
-        trim(Sales_lead)                         as sales_lead,
+        trim(`Sales lead`)                         as sales_lead,
 
         -- === Timestamps ===
-        date(safe.parse_timestamp('%Y-%m-%d %H:%M:%S %Ez', trim(Aangemaakt_op))) as aangemaakt_op
+        date(safe.parse_timestamp('%Y-%m-%d %H:%M:%S %Ez', trim(`Aangemaakt op`))) as aangemaakt_op
 
     from bron
-    where Bedrijf_ID is not null
+    where `Bedrijf ID` is not null
 
 )
 

@@ -15,10 +15,11 @@ opgeschoond as (
         cast(Uurtarief as FLOAT64)          as uurtarief,
 
         -- === Datums ===
-        Start_datum                         as start_datum
+        `Start datum`                         as start_datum
 
     from bron
     where Projectnummer is not null
+        and cast(Projectnummer as string) != ''
         and trim(Rol) != ''
 
 ),
