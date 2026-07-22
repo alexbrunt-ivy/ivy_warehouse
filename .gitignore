@@ -26,3 +26,6 @@ dbt_internal_packages/
 *.csv
 
 .aider*
+
+# Test files
+scratch/
