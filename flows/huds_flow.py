@@ -1,25 +1,36 @@
 import logging
 import os
+import sys
+from pathlib import Path
+
+# Zorg dat de root map in sys.path staat
+root_dir = Path(__file__).resolve().parent.parent
+if str(root_dir) not in sys.path:
+    sys.path.insert(0, str(root_dir))
 
 from prefect import flow, task, get_run_logger
 
-from flows.ingestion.huds import DriveHudsSource, ingest_huds, verify_huds_raw_tables
+from flows.ingestion.huds import DriveHudsSource, LocalHudsSource, ingest_huds, verify_huds_raw_tables
 
-# Folder ID van de Drive-map met HUDS-exports.
-# Staat ook in .env als HUDS_DRIVE_FOLDER_ID zodat je het per omgeving kunt overschrijven.
+# Folder ID of lokale map voor HUDS-exports
 DRIVE_FOLDER_ID = os.getenv("HUDS_DRIVE_FOLDER_ID") or "11G124iUsexfoXE9i9D5dVKhdnQcSyjTW"
+LOCAL_FOLDER_PATH = os.getenv("HUDS_LOCAL_FOLDER")
 
 
-def run_huds_ingestion(log: logging.Logger | None = None) -> dict[str, str]:
+def run_huds_ingestion(log: logging.Logger | None = None, local_folder: str | None = None) -> dict[str, str]:
     """
-    Haalt alle HUDS-bestanden op uit Google Drive en laadt ze naar BigQuery.
-
-    Gebruikt standaard logging (geen Prefect-server nodig) zodat dit ook in CI kan draaien.
+    Haalt alle HUDS-bestanden op uit Google Drive of een lokale map en laadt ze naar BigQuery.
     """
     logger = log or logging.getLogger("huds_flow")
-    logger.info(f"HUDS-ingestie gestart (Drive-map: {DRIVE_FOLDER_ID})")
+    
+    target_local = local_folder or LOCAL_FOLDER_PATH
+    if target_local:
+        logger.info(f"HUDS-ingestie gestart vanuit LOKALE map: '{target_local}'")
+        source = LocalHudsSource(folder_path=target_local)
+    else:
+        logger.info(f"HUDS-ingestie gestart vanuit GOOGLE DRIVE (map ID: {DRIVE_FOLDER_ID})")
+        source = DriveHudsSource(folder_id=DRIVE_FOLDER_ID)
 
-    source = DriveHudsSource(folder_id=DRIVE_FOLDER_ID)
     results = ingest_huds(source)
 
     ok = [name for name, status in results.items() if status == "ok"]

@@ -1,6 +1,14 @@
 import logging
 import datetime
+import sys
+from pathlib import Path
 from typing import Optional
+
+# Zorg dat de root map in sys.path staat
+root_dir = Path(__file__).resolve().parent.parent
+if str(root_dir) not in sys.path:
+    sys.path.insert(0, str(root_dir))
+
 from prefect import flow, task, get_run_logger
 
 from flows.ingestion.huds_api import (

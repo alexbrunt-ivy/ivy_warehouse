@@ -43,7 +43,7 @@ sources:
       - name: raw_huds_werknemers
         description: Werknemersgegevens uit HUDS
 
-      - name: raw_data_werknemers_intern
+      - name: raw_huds_werknemers_intern
         description: Interne werknemersgegevens uit HUDS
 
 

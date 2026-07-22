@@ -1,3 +1,11 @@
+import sys
+from pathlib import Path
+
+# Zorg dat de root map in sys.path staat
+root_dir = Path(__file__).resolve().parent.parent
+if str(root_dir) not in sys.path:
+    sys.path.insert(0, str(root_dir))
+
 from prefect import flow
 
 from flows.hubspot_flow import ingest_hubspot_flow

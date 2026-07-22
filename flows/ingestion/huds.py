@@ -44,11 +44,14 @@ REQUIRED_RAW_TABLES = (
     "raw_huds_uren_omzet_planning",
     "raw_huds_uren_omzet_realisatie",
     "raw_huds_uurtarieven",
-    "raw_data_werknemers_intern",
+    "raw_huds_werknemers_intern",
 )
 
-# Drive API heeft alleen leesrechten nodig
-_DRIVE_SCOPES = ["https://www.googleapis.com/auth/drive.readonly"]
+# Scopes voor zowel Drive (lijsten/downloaden) als Sheets API (grote bestanden lezen)
+_DRIVE_SCOPES = [
+    "https://www.googleapis.com/auth/drive.readonly",
+    "https://www.googleapis.com/auth/spreadsheets.readonly",
+]
 
 # MIME-types die worden ondersteund; andere bestanden in de map worden overgeslagen
 _SUPPORTED_MIME_TYPES = {
@@ -91,6 +94,45 @@ class HudsDataSource(Protocol):
     def get_dataframe(self, file_info: dict) -> pd.DataFrame:
         """Geeft een DataFrame terug voor het gegeven bestand."""
         ...
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Lokale Map Implementatie (voor lokaal testen zonder Google Drive API)
+# ─────────────────────────────────────────────────────────────────────────────
+
+class LocalHudsSource:
+    """
+    Leest HUDS-exportbestanden vanuit een lokale map op schijf.
+    Handig als je bestanden op je eigen pc/Google Drive Sync hebt staan.
+    """
+
+    def __init__(self, folder_path: str) -> None:
+        self.folder_path = folder_path
+        if not os.path.exists(self.folder_path):
+            raise FileNotFoundError(f"Lokale map niet gevonden op schijf: '{self.folder_path}'")
+
+    def list_files(self) -> list[dict]:
+        supported_exts = {".csv", ".xlsx", ".xls"}
+        files = []
+        for filename in os.listdir(self.folder_path):
+            ext = os.path.splitext(filename)[1].lower()
+            if ext in supported_exts:
+                files.append({
+                    "name": filename,
+                    "path": os.path.join(self.folder_path, filename),
+                    "ext": ext
+                })
+        logger.info(f"Lokale map '{self.folder_path}' bevat {len(files)} ondersteunde bestanden.")
+        return files
+
+    def get_dataframe(self, file_info: dict) -> pd.DataFrame:
+        path = file_info["path"]
+        ext = file_info["ext"]
+        logger.info(f"  Inlezen lokaal bestand '{file_info['name']}'...")
+        if ext in {".xlsx", ".xls"}:
+            return pd.read_excel(path, engine="openpyxl")
+        else:
+            return pd.read_csv(path)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -139,6 +181,7 @@ class DriveHudsSource:
             scopes=_DRIVE_SCOPES,
         )
         self._drive = build("drive", "v3", credentials=credentials, cache_discovery=False)
+        self._sheets = build("sheets", "v4", credentials=credentials, cache_discovery=False)
 
     def list_files(self) -> list[dict]:
         """
@@ -170,40 +213,68 @@ class DriveHudsSource:
         )
         return supported
 
+    def _sheet_to_dataframe(self, file_id: str, name: str) -> pd.DataFrame:
+        """
+        Leest een Google Sheet via de Sheets API (geen exportlimiet).
+        Werkt ook voor bestanden die te groot zijn voor Drive export.
+        Leest het eerste tabblad van de spreadsheet.
+        """
+        logger.info(f"  Ophalen sheet-namen voor '{name}'...")
+        meta = self._sheets.spreadsheets().get(
+            spreadsheetId=file_id,
+            fields="sheets.properties"
+        ).execute()
+        sheets = meta.get("sheets", [])
+        if not sheets:
+            raise ValueError(f"Geen tabbladen gevonden in Google Sheet '{name}'.")
+
+        # Lees het eerste tabblad
+        sheet_title = sheets[0]["properties"]["title"]
+        logger.info(f"  Lezen tabblad '{sheet_title}' via Sheets API...")
+        result = self._sheets.spreadsheets().values().get(
+            spreadsheetId=file_id,
+            range=sheet_title,
+        ).execute()
+
+        rows = result.get("values", [])
+        if not rows:
+            return pd.DataFrame()
+
+        # Eerste rij = kolomnamen, rest = data
+        headers = rows[0]
+        data = rows[1:]
+        # Rijen aanvullen tot dezelfde lengte als headers
+        padded = [row + [""] * (len(headers) - len(row)) for row in data]
+        return pd.DataFrame(padded, columns=headers)
+
     def get_dataframe(self, file_info: dict) -> pd.DataFrame:
         """
         Download een bestand uit Drive en geeft het terug als DataFrame.
 
-        Google Sheets worden via de export-API als CSV opgehaald —
-        de gebruiker hoeft niets extra's te doen.
+        Google Sheets worden via de Sheets API gelezen (geen exportlimiet).
+        CSV/XLSX bestanden worden direct gedownload via de Drive API.
         """
         file_id = file_info["id"]
         name = file_info["name"]
         mime_type = file_info["mimeType"]
 
-        buffer = io.BytesIO()
-
         if mime_type == "application/vnd.google-apps.spreadsheet":
-            logger.info(f"  Exporteer Google Sheet '{name}' als CSV...")
-            request = self._drive.files().export_media(
-                fileId=file_id,
-                mimeType="text/csv",
-            )
-        else:
-            logger.info(f"  Download '{name}'...")
-            request = self._drive.files().get_media(fileId=file_id)
+            # Gebruik Sheets API: geen exportlimiet, werkt ook voor grote bestanden
+            return self._sheet_to_dataframe(file_id, name)
 
+        # CSV / XLSX: direct downloaden via Drive API
+        buffer = io.BytesIO()
+        logger.info(f"  Download '{name}'...")
+        request = self._drive.files().get_media(fileId=file_id)
         downloader = MediaIoBaseDownload(buffer, request)
         done = False
         while not done:
             _, done = downloader.next_chunk()
-
         buffer.seek(0)
 
         if mime_type == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
             return pd.read_excel(buffer, engine="openpyxl")
-        else:
-            return pd.read_csv(buffer)
+        return pd.read_csv(buffer)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -229,7 +300,7 @@ def _file_name_to_table(file_name: str) -> str:
         .replace("-", "_")
     )
     if sanitized in {"data_werknemers_intern", "werknemers_intern"}:
-        return "raw_data_werknemers_intern"
+        return "raw_huds_werknemers_intern"
     return f"raw_huds_{sanitized}"
 
 

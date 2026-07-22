@@ -3,7 +3,7 @@
 
 with bron as (
 
-    select * from {{ source('huds', 'raw_data_werknemers_intern') }}
+    select * from {{ source('huds', 'raw_huds_werknemers_intern') }}
 
 ),
 
