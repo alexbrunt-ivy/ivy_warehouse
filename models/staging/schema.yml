@@ -12,12 +12,19 @@ models:
         description: Uniek ID van het bedrijf
         data_tests:
           - not_null
+          - unique:
+              config:
+                severity: warn
       - name: bedrijfsnaam
-        description: Naam van hecnt bedrijf
+        description: Naam van het bedrijf
         data_tests:
           - not_null
       - name: normalized_name
         description: Opgeschoonde bedrijfsnaam voor fuzzy matching
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
 
   # ──────────────────────────────────────────────────────────────────────
   # stg_huds_facturen
@@ -32,10 +39,20 @@ models:
           - not_null
       - name: project_nummer
         description: Afgeleid projectnummer uit project_raw
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
       - name: factuurdatum
         description: Datum van de factuur
         data_tests:
           - not_null
+      - name: vervaldatum
+        description: Vervaldatum van de factuur
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
       - name: status
         description: Status van de factuur
         data_tests:
@@ -51,6 +68,9 @@ models:
               arguments:
                 values: [true, false]
                 quote: false
+              config:
+                severity: warn
+
   # ──────────────────────────────────────────────────────────────────────
   # stg_huds_projecten
   # ──────────────────────────────────────────────────────────────────────
@@ -62,6 +82,9 @@ models:
         description: Uniek projectnummer
         data_tests:
           - not_null
+          - unique:
+              config:
+                severity: warn
       - name: project_id
         description: Intern ID van het project
         data_tests:
@@ -75,6 +98,24 @@ models:
         description: Status van het project
         data_tests:
           - not_null
+      - name: start_datum
+        description: Startdatum van het project
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: opdrachtgever
+        description: Opdrachtgever van het project
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: bedrijfsentiteit
+        description: Bedrijfsentiteit waaraan het project is gekoppeld
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
 
   # ──────────────────────────────────────────────────────────────────────
   # stg_huds_uren
@@ -83,12 +124,23 @@ models:
     description: >
       Urenregistraties uit HUDS, opgeschoond en met juiste datatypes.
     columns:
+      - name: uren_nummer
+        description: Uniek nummer van de urenregistratie
+        data_tests:
+          - not_null
+          - unique:
+              config:
+                severity: warn
       - name: project_raw
         description: Originele projectstring uit HUDS (bijv. "12345 - Projectnaam")
       - name: project
         description: Alias van project_raw; behouden voor backward compatibility
       - name: project_nummer
         description: Afgeleid projectnummer uit het begin van project_raw
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
       - name: projectnaam_uit_veld
         description: Afgeleide projectnaam na verwijderen van nummer en scheidingstekens
       - name: is_project_leeg
@@ -97,6 +149,18 @@ models:
         description: Aantal gewerkte uren
         data_tests:
           - not_null
+      - name: tarief
+        description: Uurtarief in euro's (NUMERIC)
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: medewerker_naam
+        description: Naam van de medewerker
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
 
   # ──────────────────────────────────────────────────────────────────────
   # stg_huds_uurtarieven
@@ -117,6 +181,12 @@ models:
         description: Het uurtarief in euro's
         data_tests:
           - not_null
+      - name: start_datum
+        description: Startdatum vanaf wanneer het tarief geldig is
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
     data_tests:
       - dbt_utils.unique_combination_of_columns:
           arguments:
@@ -138,6 +208,10 @@ models:
         description: Alias van project_raw
       - name: project_nummer
         description: Afgeleid projectnummer uit project_raw
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
       - name: projectnaam_uit_veld
         description: Afgeleide projectnaam uit project_raw
       - name: is_project_leeg
@@ -172,6 +246,10 @@ models:
         description: Alias van project_raw
       - name: project_nummer
         description: Afgeleid projectnummer uit project_raw
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
       - name: projectnaam_uit_veld
         description: Afgeleide projectnaam uit project_raw
       - name: is_project_leeg
@@ -206,6 +284,10 @@ models:
         description: Alias van project_raw
       - name: project_nummer
         description: Afgeleid projectnummer uit project_raw
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
       - name: projectnaam_uit_veld
         description: Afgeleide projectnaam uit project_raw
       - name: is_project_leeg
@@ -226,11 +308,35 @@ models:
               - periode
           config:
             where: "not is_project_leeg"
-              
+               
+  # ──────────────────────────────────────────────────────────────────────
+  # stg_huds_werknemers_intern
+  # ──────────────────────────────────────────────────────────────────────
   - name: stg_huds_werknemers_intern
     description: >
-      Interne werknemersgegevens uit huds.
+      Interne werknemersgegevens uit HUDS.
+    columns:
+      - name: werknemer_id
+        description: Uniek ID van de werknemer
+        data_tests:
+          - not_null
+          - unique:
+              config:
+                severity: warn
+      - name: werknemer_naam
+        description: Naam van de werknemer
+        data_tests:
+          - not_null
+      - name: afdeling
+        description: Afdeling van de werknemer
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
 
+  # ──────────────────────────────────────────────────────────────────────
+  # stg_hubspot_bedrijven
+  # ──────────────────────────────────────────────────────────────────────
   - name: stg_hubspot_bedrijven
     description: >
       Bedrijven uit HubSpot, gereduceerd naar kernvelden en opgeschoond met juiste datatypes.
@@ -242,6 +348,10 @@ models:
           - not_null
       - name: bedrijfsnaam
         description: Bedrijfsnaam uit HubSpot
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
       - name: normalized_name
         description: Opgeschoonde bedrijfsnaam voor fuzzy matching
       - name: website
@@ -257,6 +367,9 @@ models:
       - name: hs_analytics_latest_source
         description: Laatste analytics bron van het bedrijf
 
+  # ──────────────────────────────────────────────────────────────────────
+  # stg_hubspot_contacten
+  # ──────────────────────────────────────────────────────────────────────
   - name: stg_hubspot_contacten
     description: >
       Contacten uit HubSpot, gereduceerd naar kernvelden en opgeschoond met juiste datatypes.
@@ -268,10 +381,22 @@ models:
           - not_null
       - name: email
         description: E-mailadres van het contact
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
       - name: first_name
         description: Voornaam van het contact
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
       - name: last_name
         description: Achternaam van het contact
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
       - name: associated_company_id
         description: HubSpot ID van het gekoppelde bedrijf
       - name: company_id
@@ -287,3 +412,5 @@ models:
               arguments:
                 values: [true, false]
                 quote: false
+              config:
+                severity: warn

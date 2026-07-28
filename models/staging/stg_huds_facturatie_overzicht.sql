@@ -22,8 +22,8 @@ opgeschoond as (
 
         -- === Financieel ===
         safe_cast(nullif(trim(`Totaal uren`), '') as FLOAT64)            as totaal_uren,
-        safe_cast(nullif(trim(`Totaal omzet`), '') as FLOAT64)           as totaal_omzet,
-        safe_cast(nullif(trim(`Niet gefactureerd`), '') as FLOAT64)      as niet_gefactureerd,
+        safe_cast(nullif(trim(`Totaal omzet`), '') as NUMERIC)           as totaal_omzet,
+        safe_cast(nullif(trim(`Niet gefactureerd`), '') as NUMERIC)      as niet_gefactureerd,
 
         -- === Uren per Rol ===
         safe_cast(nullif(trim(`Uren projectmanager`), '') as FLOAT64)    as uren_projectmanager,

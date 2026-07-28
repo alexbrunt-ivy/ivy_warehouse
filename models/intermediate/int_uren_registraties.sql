@@ -24,35 +24,15 @@ verrijkt as (
 
         -- === Keys ===
         projecten.project_id,
-        projecten.project_nummer,
+        uren.project_nummer,      -- uit de macro, numeriek en eenduidig
         werknemers.werknemer_id,
 
         -- === Datums en tijd ===
-        coalesce(
-            safe_cast(uren.created_at as TIMESTAMP),
-            safe.parse_timestamp('%Y-%m-%d %H:%M:%E*S%Ez', trim(cast(uren.created_at as STRING))),
-            safe.parse_timestamp('%Y-%m-%dT%H:%M:%E*S%Ez', trim(cast(uren.created_at as STRING)))
-        ) as created_at,
-        coalesce(
-            safe_cast(uren.start_tijdstip as TIMESTAMP),
-            safe.parse_timestamp('%Y-%m-%d %H:%M:%E*S%Ez', trim(cast(uren.start_tijdstip as STRING))),
-            safe.parse_timestamp('%Y-%m-%dT%H:%M:%E*S%Ez', trim(cast(uren.start_tijdstip as STRING)))
-        ) as start_tijdstip,
-        coalesce(
-            safe_cast(uren.einde_tijdstip as TIMESTAMP),
-            safe.parse_timestamp('%Y-%m-%d %H:%M:%E*S%Ez', trim(cast(uren.einde_tijdstip as STRING))),
-            safe.parse_timestamp('%Y-%m-%dT%H:%M:%E*S%Ez', trim(cast(uren.einde_tijdstip as STRING)))
-        ) as einde_tijdstip,
-        date(coalesce(
-            safe_cast(uren.start_tijdstip as TIMESTAMP),
-            safe.parse_timestamp('%Y-%m-%d %H:%M:%E*S%Ez', trim(cast(uren.start_tijdstip as STRING))),
-            safe.parse_timestamp('%Y-%m-%dT%H:%M:%E*S%Ez', trim(cast(uren.start_tijdstip as STRING)))
-        )) as uren_datum,
-        date_trunc(date(coalesce(
-            safe_cast(uren.start_tijdstip as TIMESTAMP),
-            safe.parse_timestamp('%Y-%m-%d %H:%M:%E*S%Ez', trim(cast(uren.start_tijdstip as STRING))),
-            safe.parse_timestamp('%Y-%m-%dT%H:%M:%E*S%Ez', trim(cast(uren.start_tijdstip as STRING)))
-        )), month) as periode,
+        {{ parse_timestamp('uren.created_at') }} as created_at,
+        uren.start_tijdstip,
+        uren.einde_tijdstip,
+        date(uren.start_tijdstip) as uren_datum,
+        date_trunc(date(uren.start_tijdstip), month) as periode,
 
         -- === Medewerker ===
         uren.medewerker_naam,
@@ -86,12 +66,12 @@ verrijkt as (
         uren.locatie,
 
         -- === Financieel ===
-        safe_cast(replace(replace(trim(uren.tarief), '.', ''), ',', '.') as NUMERIC) as tarief,
-        uren.uren * safe_cast(replace(replace(trim(uren.tarief), '.', ''), ',', '.') as NUMERIC) as omzet_op_basis_van_tarief
+        uren.tarief,           -- nu al NUMERIC in staging
+        uren.uren * uren.tarief as omzet_op_basis_van_tarief
 
     from uren
     left join projecten
-        on lower(trim(uren.project)) = lower(trim(projecten.projectnaam))
+        on uren.project_nummer = projecten.project_nummer
     left join werknemers
         on lower(trim(uren.medewerker_naam)) = lower(trim(werknemers.werknemer_naam))
 

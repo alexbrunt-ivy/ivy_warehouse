@@ -11,9 +11,9 @@ opgeschoond as (
         cast(Nummer as INT64)               as uren_nummer,
 
         -- === Timestamps ===
-        `Created at`                          as created_at,
-        DATETIME(SAFE.PARSE_TIMESTAMP('%Y-%m-%d %H:%M:%S %Ez', Start),'Europe/Amsterdam') AS start_tijdstip,
-        DATETIME(SAFE.PARSE_TIMESTAMP('%Y-%m-%d %H:%M:%S %Ez', Einde),'Europe/Amsterdam') AS einde_tijdstip,
+        {{ parse_timestamp('`Created at`') }} as created_at,
+        DATETIME({{ parse_timestamp('Start') }}, 'Europe/Amsterdam') as start_tijdstip,
+        DATETIME({{ parse_timestamp('Einde') }}, 'Europe/Amsterdam') as einde_tijdstip,
 
         -- === Medewerker ===
         trim(Naam)                          as medewerker_naam,
@@ -45,7 +45,7 @@ opgeschoond as (
         trim(Locatie)                       as locatie,
 
         -- === Financieel ===
-        trim(Tarief)                        as tarief
+        safe_cast(replace(replace(trim(Tarief), '.', ''), ',', '.') as NUMERIC) as tarief
 
     from bron
 

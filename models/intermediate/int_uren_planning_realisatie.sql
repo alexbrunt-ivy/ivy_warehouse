@@ -20,8 +20,10 @@ samengevoegd as (
 
     select
         -- === Grain ===
-        coalesce(planning.project, realisatie.project, facturatie.project) as project,
+        coalesce(planning.project_nummer, realisatie.project_nummer, facturatie.project_nummer) as project_nummer,
         coalesce(planning.periode, realisatie.periode, facturatie.periode) as periode,
+        coalesce(planning.project, realisatie.project, facturatie.project) as project_raw,
+        coalesce(planning.projectnaam_uit_veld, realisatie.projectnaam_uit_veld, facturatie.projectnaam_uit_veld) as projectnaam,
 
         -- === Context ===
         coalesce(planning.account, realisatie.account, facturatie.account) as account,
@@ -78,10 +80,10 @@ samengevoegd as (
 
     from planning
     full outer join realisatie
-        on lower(trim(planning.project)) = lower(trim(realisatie.project))
+        on planning.project_nummer = realisatie.project_nummer
         and planning.periode = realisatie.periode
     full outer join facturatie
-        on lower(trim(coalesce(planning.project, realisatie.project))) = lower(trim(facturatie.project))
+        on coalesce(planning.project_nummer, realisatie.project_nummer) = facturatie.project_nummer
         and coalesce(planning.periode, realisatie.periode) = facturatie.periode
 
 )

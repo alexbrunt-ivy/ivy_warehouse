@@ -21,7 +21,7 @@ opgeschoond as (
         trim(`Project managers`)              as project_managers,
 
         -- === Datums ===
-        `Start datum`                         as start_datum
+        safe_cast(`Start datum` as DATE)      as start_datum
 
     from bron
     where `Project nummer` is not null

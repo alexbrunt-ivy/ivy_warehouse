@@ -12,11 +12,7 @@ opgeschoond as (
 
         -- === Attributen ===
         trim(Naam)                               as bedrijfsnaam,
-        REGEXP_REPLACE(
-            REGEXP_REPLACE(lower(trim(Naam)), r'\b(b\.v\.|bv|n\.v\.|nv|v\.o\.f\.|vof|group|groep|stichting|vereniging|coöperatie|cooporatie|holding)\b', ''),
-            r'[^a-z0-9]', 
-            ''
-        )                                        as normalized_name,
+        {{ normalize_bedrijfsnaam('Naam') }}     as normalized_name,
         trim(Beschrijving)                       as beschrijving,
         trim(`Sales lead`)                         as sales_lead,
 

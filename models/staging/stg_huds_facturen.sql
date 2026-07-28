@@ -13,19 +13,19 @@ opgeschoond as (
         -- === Datums ===
         safe.parse_date('%Y-%m-%d', trim(`Factuurdatum`)) as factuurdatum,
         safe.parse_date('%Y-%m-%d', trim(`Vervaldatum`))  as vervaldatum,
-        date(safe.parse_timestamp('%Y-%m-%d %H:%M:%S %Ez', trim(`Created at`))) as created_at,
+        date({{ parse_timestamp('`Created at`') }}) as created_at,
 
         -- === Attributen ===
         trim(`Prodecure`)                                         as procedure_type,
         trim(Status)                                            as status,
-        trim(Periode)                                           as periode,
+        safe.parse_date('%Y-%m-%d', trim(Periode))              as periode,
         {{ huds_parse_project('Project') }},
         trim(Opdrachtgever)                                     as opdrachtgever,
         trim(Bedrijfsentiteit)                                  as bedrijfsentiteit,
 
         -- === Numeriek ===
         safe_cast(trim(`Dagen overdue`) as INT64)                 as dagen_overdue,
-        safe_cast(replace(replace(trim(`Bedrag inc BTW`), '.', ''), ',', '.') as FLOAT64)
+        safe_cast(replace(replace(trim(`Bedrag inc BTW`), '.', ''), ',', '.') as NUMERIC)
                                                                 as bedrag_inc_btw,
         safe_cast(trim(`Aantal herinneringen gestuurd`) as INT64) as aantal_herinneringen_gestuurd,
         safe_cast(trim(`Betalingstermijn`) as INT64)              as betalingstermijn_dagen,

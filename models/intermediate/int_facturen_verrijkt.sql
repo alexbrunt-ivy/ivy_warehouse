@@ -16,6 +16,16 @@ bedrijven as (
 
 ),
 
+-- Normaliseer bedrijfsentiteit eenmalig zodat we het kunnen hergebruiken
+facturen_met_normalized as (
+
+    select
+        *,
+        {{ normalize_bedrijfsnaam('facturen.bedrijfsentiteit') }} as factuur_normalized_name
+    from facturen
+
+),
+
 verrijkt as (
 
     select
@@ -23,17 +33,12 @@ verrijkt as (
         facturen.factuur_nummer,
         bedrijven.bedrijf_id as huds_bedrijf_id,
         projecten.project_id,
-        safe_cast(regexp_extract(facturen.project, r'^(\d+)') as INT64) as project_nummer,
+        facturen.project_nummer,   -- uit de macro, numeriek en eenduidig
 
         -- === Attributen ===
         facturen.opdrachtgever as originele_opdrachtgever_naam,
-        REGEXP_REPLACE(
-            REGEXP_REPLACE(lower(trim(facturen.bedrijfsentiteit)), r'\b(b\.v\.|bv|n\.v\.|nv|v\.o\.f\.|vof|group|groep)\b', ''),
-            r'[^a-z0-9]', 
-            ''
-        ) as factuur_normalized_name,
         bedrijven.bedrijfsnaam as gekoppelde_bedrijfsnaam,
-        trim(regexp_replace(facturen.project, r'^(\d+)\s*[-:]*\s*', '')) as projectnaam_uit_factuur,
+        facturen.projectnaam_uit_veld as projectnaam_uit_factuur,
         projecten.projectnaam as gekoppelde_projectnaam,
         facturen.procedure_type,
         facturen.periode,
@@ -62,17 +67,11 @@ verrijkt as (
             else 'Onbekend'
         end as factuur_status_categorie
 
-    from facturen
-    -- We matchen de Bedrijfsentiteit uit facturen met de genormaliseerde bedrijfsnaam uit HUDS
+    from facturen_met_normalized as facturen
     left join bedrijven
-        on REGEXP_REPLACE(
-            REGEXP_REPLACE(lower(trim(facturen.bedrijfsentiteit)), r'\b(b\.v\.|bv|n\.v\.|nv|v\.o\.f\.|vof|group|groep)\b', ''),
-            r'[^a-z0-9]', 
-            ''
-        ) = bedrijven.normalized_name
-    -- We gebruiken regex om het getal aan het begin van de string er altijd veilig uit te vissen
+        on facturen.factuur_normalized_name = bedrijven.normalized_name
     left join projecten
-        on safe_cast(regexp_extract(facturen.project, r'^(\d+)') as INT64) = projecten.project_nummer
+        on facturen.project_nummer = projecten.project_nummer
 
 )
 

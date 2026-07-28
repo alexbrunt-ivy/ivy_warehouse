@@ -12,10 +12,10 @@ opgeschoond as (
 
         -- === Attributen ===
         trim(Rol)                           as rol,
-        cast(Uurtarief as FLOAT64)          as uurtarief,
+        safe_cast(Uurtarief as NUMERIC)          as uurtarief,
 
         -- === Datums ===
-        `Start datum`                         as start_datum
+        safe_cast(`Start datum` as DATE)      as start_datum
 
     from bron
     where Projectnummer is not null
@@ -26,12 +26,11 @@ opgeschoond as (
 
 gededupliceerd as (
 
-    select *
-    from opgeschoond
-    qualify row_number() over (
-        partition by project_nummer, rol, start_datum
-        order by uurtarief desc
-    ) = 1
+    {{ dbt_utils.deduplicate(
+        relation='opgeschoond',
+        partition_by='project_nummer, rol, start_datum',
+        order_by='uurtarief desc'
+    ) }}
 
 )
 

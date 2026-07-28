@@ -21,7 +21,7 @@ opgeschoond as (
 
         -- === Totalen ===
         safe_cast(nullif(trim(`Totaal uren`), '') as FLOAT64)                as totaal_uren,
-        safe_cast(nullif(trim(`Totaal omzet`), '') as FLOAT64)               as totaal_omzet,
+        safe_cast(nullif(trim(`Totaal omzet`), '') as NUMERIC)               as totaal_omzet,
 
         -- === Uren per Rol ===
         safe_cast(nullif(trim(`Uren projectmanager`), '') as FLOAT64)        as uren_projectmanager,
@@ -30,10 +30,10 @@ opgeschoond as (
         safe_cast(nullif(trim(`Uren projectengineer`), '') as FLOAT64)       as uren_projectengineer,
 
         -- === Omzet per Rol ===
-        safe_cast(nullif(trim(`Omzet projectmanager`), '') as FLOAT64)       as omzet_projectmanager,
-        safe_cast(nullif(trim(`Omzet projectleider`), '') as FLOAT64)        as omzet_projectleider,
-        safe_cast(nullif(trim(`Omzet medewerker`), '') as FLOAT64)           as omzet_medewerker,
-        safe_cast(nullif(trim(`Omzet projectengineer`), '') as FLOAT64)      as omzet_projectengineer
+        safe_cast(nullif(trim(`Omzet projectmanager`), '') as NUMERIC)       as omzet_projectmanager,
+        safe_cast(nullif(trim(`Omzet projectleider`), '') as NUMERIC)        as omzet_projectleider,
+        safe_cast(nullif(trim(`Omzet medewerker`), '') as NUMERIC)           as omzet_medewerker,
+        safe_cast(nullif(trim(`Omzet projectengineer`), '') as NUMERIC)      as omzet_projectengineer
 
     from bron
 

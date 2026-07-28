@@ -32,10 +32,14 @@ models:
       Gecombineerd intermediate model voor geplande uren, gerealiseerde uren en facturatie per project en periode.
       Bedoeld als basis voor latere facttabellen, voorspellingen en afwijkingsanalyses.
     columns:
-      - name: project
-        description: Projectnaam; onderdeel van de voorlopige grain
+      - name: project_nummer
+        description: Projectnummer; numerieke key, onderdeel van de grain
         data_tests:
           - not_null
+      - name: project_raw
+        description: Originele projectstring uit HUDS (voor traceerbaarheid)
+      - name: projectnaam
+        description: Projectnaam uit geparste project string
       - name: periode
         description: Periode; onderdeel van de voorlopige grain
         data_tests:

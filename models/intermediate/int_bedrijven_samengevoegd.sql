@@ -10,7 +10,7 @@ hubspot_bedrijven as (
 
 ),
 
-final as (
+samengevoegd as (
 
     select
         -- === Keys ===
@@ -21,7 +21,9 @@ final as (
         coalesce(huds.bedrijfsnaam, hubspot.bedrijfsnaam) as bedrijfsnaam,
         huds.bedrijfsnaam as huds_bedrijfsnaam,
         hubspot.bedrijfsnaam as hubspot_bedrijfsnaam,
-        huds.normalized_name,
+        huds.normalized_name as huds_normalized_name,
+        hubspot.normalized_name as hubspot_normalized_name,
+        coalesce(huds.normalized_name, hubspot.normalized_name) as normalized_name,
         hubspot.website as website,
         huds.beschrijving as huds_beschrijving,
         hubspot.beschrijving as hubspot_beschrijving,
@@ -42,6 +44,19 @@ final as (
     full outer join hubspot_bedrijven as hubspot
         on huds.normalized_name = hubspot.normalized_name
 
+),
+
+-- Dedupliceer: houd 1 rij per combinatie van bedrijf_id + hubspot_bedrijf_id
+-- Bij FULL OUTER JOIN kunnen meerdere HUDS records matchen met meerdere HubSpot records
+gededupliceerd as (
+
+    select *
+    from samengevoegd
+    qualify row_number() over (
+        partition by coalesce(bedrijf_id, hubspot_bedrijf_id, normalized_name, '')
+        order by hubspot_geupdated_op desc nulls last
+    ) = 1
+
 )
 
-select * from final
+select * from gededupliceerd

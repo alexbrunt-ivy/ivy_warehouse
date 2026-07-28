@@ -30,11 +30,11 @@ models:
 seeds:
   ivy_warehouse:
     +schema: seeds
-    dim_regio:
+    seed_regio:
       +column_types:
         regio_id: INT64
         is_actief: BOOL
-    dim_team:
+    seed_team:
       +column_types:
         team_id: INT64
         regio_id: INT64

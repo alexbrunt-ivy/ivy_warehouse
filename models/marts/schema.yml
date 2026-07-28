@@ -1,6 +1,313 @@
 version: 2
 
 models:
+  # ────────────────────────────────────────────────────────────────────────────
+  # dim_project
+  # ────────────────────────────────────────────────────────────────────────────
+  - name: dim_project
+    description: >
+      Dimensie met alle projecten uit HUDS. Bevat zowel identificerende als
+      beschrijvende attributen voor projectmanagement en accountmanagement
+      rapportages.
+    columns:
+      - name: project_nummer
+        description: Uniek projectnummer uit HUDS (INT64)
+        data_tests:
+          - unique
+          - not_null
+      - name: project_id
+        description: Intern ID van het project uit HUDS
+        data_tests:
+          - unique
+          - not_null
+      - name: projectnaam
+        description: Naam van het project
+      - name: opdrachtgever
+        description: Naam van de opdrachtgever (klant)
+      - name: bedrijfsentiteit
+        description: Bedrijfsentiteit waarbinnen het project valt
+      - name: status
+        description: Huidige status van het project (bijv. actief, afgerond)
+      - name: goedkeuring
+        description: Goedkeuringsstatus van het project
+      - name: account_manager
+        description: Accountmanager verantwoordelijk voor het project
+      - name: project_manager
+        description: Projectmanager(s) verantwoordelijk voor het project
+      - name: start_datum
+        description: Startdatum van het project
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # dim_bedrijf
+  # ────────────────────────────────────────────────────────────────────────────
+  - name: dim_bedrijf
+    description: >
+      Dimensie met bedrijven uit zowel HUDS als HubSpot, samengevoegd op basis
+      van genormaliseerde bedrijfsnaam. Bevat adresgegevens en verwijzingen naar
+      beide bronnen.
+    columns:
+      - name: bedrijf_key
+        description: Surrogate key voor de bedrijvendimensie
+        data_tests:
+          - unique
+          - not_null
+      - name: bedrijf_id
+        description: Bedrijf ID uit HUDS
+      - name: hubspot_bedrijf_id
+        description: Bedrijf ID uit HubSpot
+      - name: bedrijfsnaam
+        description: Samengevoegde bedrijfsnaam (HUDS met fallback naar HubSpot)
+      - name: normalized_name
+        description: Opgeschoonde bedrijfsnaam voor matching (zonder rechtsvormen)
+      - name: website
+        description: Primair domein van het bedrijf uit HubSpot
+      - name: adres
+        description: Volledig adres (straat + huisnummer) uit HubSpot
+      - name: stad
+        description: Stad uit HubSpot
+      - name: land
+        description: Land uit HubSpot
+      - name: sales_lead
+        description: Sales lead uit HUDS
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # dim_medewerker
+  # ────────────────────────────────────────────────────────────────────────────
+  - name: dim_medewerker
+    description: >
+      Dimensie met interne medewerkers uit HUDS. Bevat naam en afdeling.
+    columns:
+      - name: medewerker_key
+        description: Surrogate key voor de medewerkersdimensie
+        data_tests:
+          - unique
+          - not_null
+      - name: werknemer_id
+        description: Werknemer ID uit HUDS
+        data_tests:
+          - unique
+          - not_null
+      - name: medewerker_naam
+        description: Volledige naam van de medewerker
+      - name: afdeling
+        description: Afdeling van de medewerker
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # dim_date
+  # ────────────────────────────────────────────────────────────────────────────
   - name: dim_date
     description: >
-      Dimensie tabel voor datum-gerelateerde attributen.
+      Datumdimensie met elke dag van 2014 tot 2051. Bevat jaar, kwartaal, maand,
+      week, dag-namen, en indicatoren voor weekend/werkdag. Geschikt voor
+      time-intelligent rapportages in BI-tools.
+    columns:
+      - name: datum
+        description: Datum (DATE)
+        data_tests:
+          - unique
+          - not_null
+      - name: datum_key
+        description: Numerieke sleutel in YYYYMMDD formaat voor BI-tools
+      - name: jaar
+        description: Jaar (extract)
+      - name: kwartaal
+        description: Kwartaal (1-4)
+      - name: maand
+        description: Maandnummer (1-12)
+      - name: maand_naam
+        description: Maandnaam in het Nederlands
+      - name: weeknummer
+        description: ISO weeknummer (maandag-start)
+      - name: dag_van_de_maand
+        description: Dag van de maand (1-31)
+      - name: dag_van_de_week
+        description: Dag van de week EU-formaat (maandag=1, zondag=7)
+      - name: dag_naam
+        description: Dag naam in het Nederlands
+      - name: is_weekend
+        description: True voor zaterdag en zondag
+      - name: is_werkdag
+        description: True voor maandag tot en met vrijdag
+      - name: eerste_dag_maand
+        description: Eerste dag van de maand
+      - name: laatste_dag_maand
+        description: Laatste dag van de maand
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # dim_regio
+  # ────────────────────────────────────────────────────────────────────────────
+  - name: dim_regio
+    description: >
+      Dimensie met regio's, geladen uit seed. Bevat regio ID, naam en actief-status.
+    columns:
+      - name: regio_id
+        description: Uniek ID van de regio
+        data_tests:
+          - unique
+          - not_null
+      - name: regio_naam
+        description: Naam van de regio (bijv. Delft, Amsterdam, Eindhoven)
+      - name: is_actief
+        description: Of de regio nog actief is
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # dim_team
+  # ────────────────────────────────────────────────────────────────────────────
+  - name: dim_team
+    description: >
+      Dimensie met teams, geladen uit seed. Bevat teamnaam, regio en actief-status.
+    columns:
+      - name: team_id
+        description: Uniek ID van het team
+        data_tests:
+          - unique
+          - not_null
+      - name: team_naam
+        description: Naam van het team
+      - name: regio_id
+        description: ID van de regio waar het team onder valt
+      - name: regio_naam
+        description: Naam van de regio
+      - name: is_actief
+        description: Of het team nog actief is
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # fct_uren_maand
+  # ────────────────────────────────────────────────────────────────────────────
+  - name: fct_uren_maand
+    description: >
+      Feitentabel voor uren en omzet per project per maand. Dit is de centrale
+      tabel voor uren-vs-budget analyses. Bevat planning, realisatie, facturatie
+      en afwijkingen op zowel totaal- als rol-niveau.
+      De grain is: 1 rij per project_nummer x periode (maand).
+    columns:
+      - name: project_key
+        description: Surrogate key naar dim_project
+        data_tests:
+          - not_null
+      - name: project_nummer
+        description: Projectnummer (FK naar dim_project)
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_project')
+                field: project_nummer
+      - name: periode
+        description: Maand (DATE, eerste dag van de maand)
+        data_tests:
+          - not_null
+      - name: geplande_uren
+        description: Totaal geplande uren voor deze project-maand combinatie
+      - name: geplande_omzet
+        description: Totaal geplande omzet voor deze project-maand combinatie
+      - name: gerealiseerde_uren
+        description: Totaal gerealiseerde uren voor deze project-maand combinatie
+      - name: gerealiseerde_omzet
+        description: Totaal gerealiseerde omzet voor deze project-maand combinatie
+      - name: gefactureerde_uren
+        description: Totaal gefactureerde uren voor deze project-maand combinatie
+      - name: gefactureerde_omzet
+        description: Totaal gefactureerde omzet voor deze project-maand combinatie
+      - name: niet_gefactureerd
+        description: Nog niet gefactureerd bedrag
+      - name: afwijking_uren_realisatie_vs_planning
+        description: Gerealiseerde uren minus geplande uren (positief = overuren)
+      - name: afwijking_omzet_realisatie_vs_planning
+        description: Gerealiseerde omzet minus geplande omzet
+      - name: afwijking_uren_facturatie_vs_realisatie
+        description: Gefactureerde uren minus gerealiseerde uren
+      - name: afwijking_omzet_facturatie_vs_realisatie
+        description: Gefactureerde omzet minus gerealiseerde omzet
+      - name: resterend_budget_uren
+        description: Geplande uren minus gerealiseerde uren (resterend budget in uren)
+      - name: resterend_budget_omzet
+        description: Geplande omzet minus gerealiseerde omzet (resterend budget in euro)
+      - name: project_raw
+        description: Originele projectstring uit HUDS (voor traceerbaarheid)
+      - name: projectnaam
+        description: Projectnaam uit de parsed project string
+      - name: account
+        description: Account / klantnaam
+      - name: type_dienst
+        description: Type dienst (bijv. advies, engineering)
+      - name: business_entity
+        description: Business entity
+      - name: regio
+        description: Regio
+      - name: project_managers
+        description: Projectmanager(s)
+      - name: accountmanager
+        description: Accountmanager
+      - name: goedkeuring
+        description: Goedkeuringsstatus
+      - name: uren_status
+        description: Status van de urenregistratie
+      - name: facturatie_status
+        description: Status van de facturatie
+      - name: procedure_type
+        description: Type procedure
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # fct_facturen
+  # ────────────────────────────────────────────────────────────────────────────
+  - name: fct_facturen
+    description: >
+      Feitentabel voor facturen uit HUDS, verrijkt met bedrijf- en projectinformatie.
+      Bevat financiële gegevens, betaalstatus en categorisatie (Betaald / Open / Te laat).
+      De grain is: 1 rij per factuur_nummer (let op: factuurnummer kan hergebruikt
+      zijn per project, dus de combinatie met project_nummer is uniek).
+    columns:
+      - name: factuur_key
+        description: Surrogate key op basis van factuur_nummer + project_nummer + factuurdatum
+        data_tests:
+          - unique:
+              config:
+                severity: warn
+          - not_null
+      - name: project_key
+        description: Surrogate key naar dim_project
+      - name: bedrijf_key
+        description: Surrogate key naar dim_bedrijf
+      - name: factuur_nummer
+        description: Factuurnummer (niet uniek op zichzelf; hergebruikt per project)
+        data_tests:
+          - not_null
+      - name: project_nummer
+        description: Projectnummer (FK naar dim_project)
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_project')
+                field: project_nummer
+      - name: huds_bedrijf_id
+        description: Bedrijf ID uit HUDS
+      - name: factuurdatum
+        description: Datum van de factuur
+        data_tests:
+          - not_null
+      - name: vervaldatum
+        description: Vervaldatum van de factuur
+      - name: factuur_aangemaakt_op
+        description: Technische aanmaakdatum van het factuurrecord
+      - name: bedrag_inc_btw
+        description: Factuurbedrag inclusief BTW
+        data_tests:
+          - not_null
+      - name: betalingstermijn_dagen
+        description: Betalingstermijn in dagen
+      - name: originele_status
+        description: Originele status uit HUDS
+      - name: is_factuur_voldaan
+        description: Of de factuur betaald is (true/false)
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [true, false]
+                quote: false
+      - name: factuur_status_categorie
+        description: Gestandaardiseerde status (Betaald / Open (binnen termijn) / Te laat / Onbekend)
+      - name: dagen_overdue
+        description: Aantal dagen dat de factuur over tijd is
+      - name: aantal_herinneringen_gestuurd
+        description: Aantal betalingsherinneringen dat is gestuurd
